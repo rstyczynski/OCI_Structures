@@ -27,13 +27,13 @@ The access list is kept in a map of objects with key representing set of access 
 1. ingress
 
 ```
-    [for records in local.sl_ingress["SL_NAME"].rules : records ]
+    local.sl_ingress["SL_NAME"].rules
 ```
 
 2. egress
 
 ```
-    [for records in local.sl_egress["SL_NAME"].rules : records]
+    local.sl_egress["SL_NAME"].rules
 ```
 
 ## Unit test test
