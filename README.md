@@ -1,24 +1,29 @@
 # SL_v1
-OCI terraform provider requires to use quite strange way of configuring security lists. Data structure is not intuitive, and requires a lot of writing to define access list. Landing Zone libraries tries to eliminate this hassle, still keeping a lot of API overhead. One of examples are min, and max fields for tcp/udp port definition. Not bad for some of use cases, but not nice for majority of them.
+OCI terraform provider requires to use quite strange way of configuring security lists. Data structure is not intuitive, and requires a lot of writing to define access list. Landing Zone libraries try to eliminate this hassle, still keeping a lot of API overhead. One of examples are min, and max fields for tcp/udp port definition. Not bad for some of use cases, but not nice for majority of them.
 
 This library proposes two formats:
 1. One line per access rule
 
 ```
-        0.0.0.0/0 >> tcp/30000-40000:1521-1523 /* DB access for some of us */
+        0.0.0.0/0 >> tcp/1521-1523 /* DB access for everybody! */
 ```
 
 2. Optimized protocol and port numbers
 
 ```
-          description = "DB access for some of us"
-          protocol    = "tcp/30000-40000:1521-1523"
+          description = "DB access for everybody! "
+          protocol    = "tcp/1521-1523"
           source      = "0.0.0.0/0"
           destination = null
           stateless   = false
 ```
 
-Access list is kept in a map of objects with key representing set of access rules i.e. security list. The library produces data structure compatible with CIS Landing Zone Network Module with access code:
+Both statements means the same. I hope that the former is just nicer to write.
+
+You can use the latter one if you prefer, and the one liner is always converted to the more descriptive one, which is converted to CIZ Enhanced Networking module format.
+
+The access list is kept in a map of objects with key representing set of access rules i.e. security list. The library produces data structure compatible with CIS Landing Zone Network Module with access code:
+
 1. ingress
 
 ```
