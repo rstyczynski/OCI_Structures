@@ -5,17 +5,17 @@ This library proposes two formats:
 1. One line per access rule
 
 ```
-        0.0.0.0/0 >> tcp/1521-1523 /* DB access for everybody! */
+    0.0.0.0/0 >> tcp/1521-1523 /* DB access for everybody! */
 ```
 
 2. Optimized protocol and port numbers
 
 ```
-          description = "DB access for everybody! "
-          protocol    = "tcp/1521-1523"
-          source      = "0.0.0.0/0"
-          destination = null
-          stateless   = false
+    description = "DB access for everybody! "
+    protocol    = "tcp/1521-1523"
+    source      = "0.0.0.0/0"
+    destination = null
+    stateless   = false
 ```
 
 Both statements mean the same thing. I hope the former is just more fun to write.
@@ -52,17 +52,17 @@ Uni test works in two modes:
 For details look into test.sh, and try it.
 
 ```
-terraform init
-. test.sh
+    terraform init
+    . test.sh
 ```
 
 with expected answer:
 
 ```
-sl_simple OK
-sl OK
-sl_egress OK
-sl_ingress OK
+    sl_simple OK
+    sl OK
+    sl_egress OK
+    sl_ingress OK
 ```
 
 
