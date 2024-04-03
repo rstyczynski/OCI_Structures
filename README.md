@@ -18,7 +18,7 @@ This library proposes two formats:
           stateless   = false
 ```
 
-Both statements means the same. I hope that the former is just nicer to write.
+Both statements mean the same thing. I hope the former is just more fun to write.
 
 You can use the latter one if you prefer, and the one liner is always converted to the more descriptive one, which is converted to CIZ Enhanced Networking module format.
 
