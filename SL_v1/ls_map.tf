@@ -368,8 +368,8 @@ locals {
           protocol    = upper(entry.rules[tonumber(position)].protocol)
           stateless   = entry.rules[tonumber(position)].stateless
 
-          source       = entry.rules[tonumber(position)].source
-          source_type  = entry.rules[tonumber(position)].source_type
+          src       = entry.rules[tonumber(position)].source
+          src_type  = entry.rules[tonumber(position)].source_type
 
           destination = entry.rules[tonumber(position)].destination
           destination_type = entry.rules[tonumber(position)].destination_type
@@ -406,8 +406,8 @@ locals {
           protocol    = upper(entry.rules[tonumber(position)].protocol)
           stateless   = entry.rules[tonumber(position)].stateless
 
-          destination = entry.rules[tonumber(position)].destination
-          destination_type = entry.rules[tonumber(position)].destination_type
+          dst = entry.rules[tonumber(position)].destination
+          dst_type = entry.rules[tonumber(position)].destination_type
         
           src_port_min = try(tonumber(entry.rules[tonumber(position)].src_port_min), null)
           src_port_max = entry.rules[tonumber(position)].src_port_max != "" ? try(tonumber(entry.rules[tonumber(position)].src_port_max),null) : try(tonumber(entry.rules[tonumber(position)].src_port_min),null)
