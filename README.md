@@ -31,7 +31,6 @@ Access list is kept in a map of objects with key representing set of access rule
     [for records in local.sl_egress["SLE_NAME"].rules : records]
 ```
 
-
 ## Unit test test
 *Note: Unit test is just a draft now, but the working one.*
 
