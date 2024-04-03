@@ -49,7 +49,23 @@ Uni test works in two modes:
 1. verify list of simple outputs a=1, b=2, etc.
 2. verify single complex structure
 
-For details look into test.sh
+For details look into test.sh, and try it.
+
+```
+terraform init
+. test.sh
+```
+
+with expected answer:
+
+```
+sl_simple OK
+sl OK
+sl_egress OK
+sl_ingress OK
+```
+
+
 
 # Change list
 
