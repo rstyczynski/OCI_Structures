@@ -20,20 +20,20 @@ This library proposes two formats:
 
 Both statements mean the same thing. I hope the former is just more fun to write.
 
-You can use the latter one if you prefer, and the one liner is always converted to the more descriptive one, which is converted to CIZ Enhanced Networking module format.
+You can use the latter one if you prefer, and the one-liner is always converted to the more descriptive one, which is converted to CIZ Enhanced Networking module format. 
 
 The access list is kept in a map of objects with key representing set of access rules i.e. security list. The library produces data structure compatible with CIS Landing Zone Network Module with access code:
 
 1. ingress
 
 ```
-    [for records in local.sl_ingress["SLI_NAME"].rules : records ]
+    [for records in local.sl_ingress["SL_NAME"].rules : records ]
 ```
 
 2. egress
 
 ```
-    [for records in local.sl_egress["SLE_NAME"].rules : records]
+    [for records in local.sl_egress["SL_NAME"].rules : records]
 ```
 
 ## Unit test test
