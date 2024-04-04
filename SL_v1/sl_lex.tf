@@ -3,7 +3,7 @@ variable "sl_lex" {
 
   default = {
       "demo1" = [
-        "TcP/21-22:1521-1523 >> 0.0.0.0/0 /* DB for some of you */",
+        "TcP/21-22:1521-1523 >> on_premises /* DB for some of you */",
         "0.0.0.0/0      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
         "tcp/:1521-1523 > 0.0.0.0/0",
         "0.0.0.0/0      >> uDP/22-23 /* strange ingress udp */",
@@ -13,8 +13,8 @@ variable "sl_lex" {
         "0.0.0.0/0      >> uDP/222-223",
       ],
       "demo2" = [
-        "icmp/3.4       >> 0.0.0.0/0 /* egress icmp type 3, code 4 */",
-        "0.0.0.0/0      >> icmp/8",
+        "icmp/3.4       >> 0.0.0.0/0 /* egress icmp type 3 code 4 */",
+        "0.0.0.0/0      >> icmp/8", 
         "0.0.0.0/0      >> icmp/1. /* icmp type 1 */",
         "icmp/3.        > 0.0.0.0/0",
         "0.0.0.0/0      > icmp/8.1"        
@@ -25,29 +25,41 @@ variable "sl_lex" {
 //     value = var.sl_lex
 // }
 
+# general regexp patterns
+locals {
+  cidr = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})"
+  label = "([\\w\\.\\/]+)"
+  ip_ports_dst = "(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)"
+  ip_ports_full = format("%s:%s",local.ip_ports_dst,"([0-9]*)-?([0-9]*)")
+  icmp_tc = "(?i)icmp\\/([0-9]*).?([0-9]*)"
+  state = "(>{1,2})"
+  comment = "(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)"
+  comment_option = "(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)?"
+  eos = "$"
+}
 #  pattern to decode lexical rule
 locals {
-    regexp_egress = "(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*):([0-9]*)-?([0-9]*)\\s*(>{1,2})\\s*([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)?" 
-    regexp_ingress  = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(>{1,2})\\s*(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*):([0-9]*)-?([0-9]*)\\s*(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)?"
+    regexp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.ip_ports_full, local.state, local.label, local.comment_option)
+    regexp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.label, local.state, local.ip_ports_full, local.comment_option)
 }
 
 # patterns for special case of dst only
 locals {
-    regexp_egress_dst = "(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)\\s*(>{1,2})\\s*([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)?"
+    regexp_egress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.ip_ports_dst, local.state, local.cidr, local.comment_option)
     // regexp_ingress_dst_cmt takes full syntax with comments
     // regexp_ingress_dst is ended by $
     // both are workaround for lack of knowledge how to forbid ':' character after ports.
     // w/o above ingress_dst regexp matches generic regexp_ingress
-    regexp_ingress_dst_cmt = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(>{1,2})\\s*(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)\\s*\\/\\*\\s*(?:([\\w !]*))\\*\\/"
-    regexp_ingress_dst = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(>{1,2})\\s*(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)$"
+    regexp_ingress_dst_cmt =  format("%s\\s*%s\\s*%s\\s*%s",local.cidr, local.state, local.ip_ports_dst, local.comment)
+    regexp_ingress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.cidr, local.state, local.ip_ports_dst, local.eos)
 }
 
 # patterns for icmp
 locals {
-    regexp_icmp_egress = "(?i)icmp\\/([0-9]*).?([0-9]*)\\s*(>{1,2})\\s*([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*$"
-    regexp_icmp_egress_cmt = "(?i)icmp\\/([0-9]*).?([0-9]*)\\s*(>{1,2})\\s*([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(?:\\/\\*\\s*)(?:([\\w !]*))(?:\\*\\/)"
-    regexp_icmp_ingress = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(>{1,2})\\s*(?i)icmp\\/([0-9]*).?([0-9]*)\\s*$"
-    regexp_icmp_ingress_cmt = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(>{1,2})\\s*(?i)icmp\\/([0-9]*).?([0-9]*)\\s*(?:\\/\\*\\s*)(?:([\\w !]*))(?:\\*\\/)"
+    regexp_icmp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.icmp_tc, local.state, local.cidr, local.eos)
+    regexp_icmp_egress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.icmp_tc, local.state, local.cidr, local.comment)
+    regexp_icmp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.cidr, local.state, local.icmp_tc, local.eos)
+    regexp_icmp_ingress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.cidr, local.state, local.icmp_tc, local.comment)
 }
 
 # add index variable to keep order of records
@@ -76,8 +88,8 @@ locals {
             _format = "error"
             description = "Processing error."
             protocol = "error/0"
-            source      = null
-            destination = null
+            src      = null
+            dst = null
             stateless = null
         } 
     } 
@@ -92,6 +104,8 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_egress"
+            _src        = record.rule
+            _regexp     = local.regexp_egress
 
             # try egress generic
             protocol    = format("%s/%s-%s:%s-%s",
@@ -101,8 +115,8 @@ locals {
                 regex(local.regexp_egress, record.rule)[3], # dst_min
                 regex(local.regexp_egress, record.rule)[4]  # dst_max
             )
-            source      = null
-            destination = regex(local.regexp_egress, record.rule)[6]
+            src      = null
+            dst = regex(local.regexp_egress, record.rule)[6]
             description = regex(local.regexp_egress, record.rule)[7]
             stateless   = regex(local.regexp_egress, record.rule)[5] == ">>" ? true : regex(local.regexp_egress, record.rule)[5] == ">" ? false : null
         } if can(regex(local.regexp_egress, record.rule))
@@ -122,6 +136,8 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_ingress"
+            _src        = record.rule
+            _regexp     = local.regexp_ingress
 
             # try egress generic
             protocol    = format("%s/%s-%s:%s-%s",
@@ -131,8 +147,8 @@ locals {
                 regex(local.regexp_ingress, record.rule)[5], # dst_min
                 regex(local.regexp_ingress, record.rule)[6]  # dst_max
             )
-            source = regex(local.regexp_ingress, record.rule)[0]
-            destination = null
+            src = regex(local.regexp_ingress, record.rule)[0]
+            dst = null
             description = regex(local.regexp_ingress, record.rule)[7]
             stateless   = regex(local.regexp_ingress, record.rule)[1] == ">>" ? true : regex(local.regexp_ingress, record.rule)[1] == ">" ? false : null
         } if can(regex(local.regexp_ingress, record.rule))
@@ -152,14 +168,16 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_egress_dst"
+            _src        = record.rule
+            _regexp     = local.regexp_egress_dst
 
             protocol    = format("%s/%s-%s",
                 regex(local.regexp_egress_dst, record.rule)[0], # protocol
                 regex(local.regexp_egress_dst, record.rule)[1], # dst_min
                 regex(local.regexp_egress_dst, record.rule)[2]  # dst_max
             )
-            source      = null
-            destination = regex(local.regexp_egress_dst, record.rule)[4]
+            src      = null
+            dst = regex(local.regexp_egress_dst, record.rule)[4]
             description = regex(local.regexp_egress_dst, record.rule)[5]
             stateless   = regex(local.regexp_egress_dst, record.rule)[3] == ">>" ? true : regex(local.regexp_egress_dst, record.rule)[3] == ">" ? false : null
         } if can(regex(local.regexp_egress_dst, record.rule))
@@ -179,8 +197,7 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_ingress_dst"
-
-            _source     = record.rule
+            _src        = record.rule
             _regexp     = local.regexp_ingress_dst
 
             protocol    = format("%s/%s-%s",
@@ -188,8 +205,8 @@ locals {
                 regex(local.regexp_ingress_dst, record.rule)[3], # dst_min
                 regex(local.regexp_ingress_dst, record.rule)[4]  # dst_max
             )
-            source = regex(local.regexp_ingress_dst, record.rule)[0]
-            destination = null
+            src = regex(local.regexp_ingress_dst, record.rule)[0]
+            dst = null
             description = null
             stateless   = regex(local.regexp_ingress_dst, record.rule)[1] == ">>" ? true : regex(local.regexp_ingress_dst, record.rule)[1] == ">" ? false : null
         } if can(regex(local.regexp_ingress_dst, record.rule))
@@ -209,8 +226,7 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_ingress_dst"
-
-            _source     = record.rule
+            _src        = record.rule
             _regexp     = local.regexp_ingress_dst_cmt
 
             protocol    = format("%s/%s-%s",
@@ -218,8 +234,8 @@ locals {
                 regex(local.regexp_ingress_dst_cmt, record.rule)[3], # dst_min
                 regex(local.regexp_ingress_dst_cmt, record.rule)[4]  # dst_max
             )
-            source = regex(local.regexp_ingress_dst_cmt, record.rule)[0]
-            destination = null
+            src = regex(local.regexp_ingress_dst_cmt, record.rule)[0]
+            dst = null
             description = regex(local.regexp_ingress_dst_cmt, record.rule)[5]
             stateless   = regex(local.regexp_ingress_dst_cmt, record.rule)[1] == ">>" ? true : regex(local.regexp_ingress_dst_cmt, record.rule)[1] == ">" ? false : null
         } if can(regex(local.regexp_ingress_dst_cmt, record.rule))
@@ -239,16 +255,15 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_icmp_ingress_cmt"
-
-            _source     = record.rule
+            _src        = record.rule
             _regexp     = local.regexp_icmp_ingress_cmt
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_icmp_ingress_cmt, record.rule)[2], # type
                 regex(local.regexp_icmp_ingress_cmt, record.rule)[3]  # code
             )
-            source = regex(local.regexp_icmp_ingress_cmt, record.rule)[0]
-            destination = null
+            src = regex(local.regexp_icmp_ingress_cmt, record.rule)[0]
+            dst = null
             description = regex(local.regexp_icmp_ingress_cmt, record.rule)[4]
         } if can(regex(local.regexp_icmp_ingress_cmt, record.rule))
     }
@@ -267,16 +282,15 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_icmp_ingress"
-
-            _source     = record.rule
+            _src        = record.rule
             _regexp     = local.regexp_icmp_ingress
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_icmp_ingress, record.rule)[2], # type
                 regex(local.regexp_icmp_ingress, record.rule)[3]  # code
             )
-            source = regex(local.regexp_icmp_ingress, record.rule)[0]
-            destination = null
+            src = regex(local.regexp_icmp_ingress, record.rule)[0]
+            dst = null
             description = null
         } if can(regex(local.regexp_icmp_ingress, record.rule))
     }
@@ -296,16 +310,15 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_icmp_egress_cmt"
-
-            _source     = record.rule
+            _src        = record.rule
             _regexp     = local.regexp_icmp_egress_cmt
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_icmp_egress_cmt, record.rule)[0], # type
                 regex(local.regexp_icmp_egress_cmt, record.rule)[1]  # code
             )
-            source = null
-            destination = regex(local.regexp_icmp_egress_cmt, record.rule)[3]
+            src = null
+            dst = regex(local.regexp_icmp_egress_cmt, record.rule)[3]
 
             description = regex(local.regexp_icmp_egress_cmt, record.rule)[4]
         } if can(regex(local.regexp_icmp_egress_cmt, record.rule))
@@ -325,16 +338,15 @@ locals {
         record._position => {
             _position   = record._position
             _format     = "regexp_icmp_egress"
-
-            _source     = record.rule
+            _src        = record.rule
             _regexp     = local.regexp_icmp_egress
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_icmp_egress, record.rule)[0], # type
                 regex(local.regexp_icmp_egress, record.rule)[1]  # code
             )
-            source = null
-            destination = regex(local.regexp_icmp_egress, record.rule)[3]
+            src = null
+            dst = regex(local.regexp_icmp_egress, record.rule)[3]
 
             description = null
         } if can(regex(local.regexp_icmp_egress, record.rule))
@@ -353,9 +365,9 @@ locals {
       sort(formatlist("%010d", [for rule in value : rule._position]))
   }
 }
-// output "sl_lex_positions_per_key" {
-//   value = local.sl_lex_positions_per_key
-// }
+output "sl_lex_positions_per_key" {
+  value = local.sl_lex_positions_per_key
+}
 
 locals {
   sl_lex = {

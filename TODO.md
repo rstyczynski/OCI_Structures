@@ -1,6 +1,7 @@
 # TODO
 2. Update test.sh for error cases
-3. 
+3. CIDR may be rendered from label
+4. Update comment's regex for ','
 
 100. add support for IPv6 at regexp_cidr / destination_type
 110. make security_list input compatible with oci_core_security_list/egress_security_rules and oci_core_security_list/ingress_security_rules
