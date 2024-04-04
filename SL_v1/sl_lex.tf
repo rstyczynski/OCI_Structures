@@ -34,9 +34,9 @@ locals {
 # patterns for special case of dst only
 locals {
     regexp_egress_dst = "(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)\\s*(>{1,2})\\s*([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)?"
-    // regexp_ingress_dst_cmt takes full syntaxt with comments
+    // regexp_ingress_dst_cmt takes full syntax with comments
     // regexp_ingress_dst is ended by $
-    // both are workaround for lack of knowlkedge how to forbid ':' character after ports.
+    // both are workaround for lack of knowledge how to forbid ':' character after ports.
     // w/o above ingress_dst regexp matches generic regexp_ingress
     regexp_ingress_dst_cmt = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(>{1,2})\\s*(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)\\s*\\/\\*\\s*(?:([\\w !]*))\\*\\/"
     regexp_ingress_dst = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})\\s*(>{1,2})\\s*(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)$"
@@ -52,7 +52,7 @@ locals {
 
 # add index variable to keep order of records
 # it's needed as processing is implemented for subsets of the list
-# having index field, it's possible to keep oryginal order in final list
+# having index field, it's possible to keep original order in final list
 locals {
   sl_lex_indexed = {
     for key, value in var.sl_lex : 
@@ -365,8 +365,8 @@ locals {
         for position in local.sl_lex_positions_per_key[key]:
 
             // data is kept in separate data structures because of processing limitations
-            // this is a moment when all pieces are collected togeher
-            // Note that each interm data dtructure keeps distinct set of data,
+            // this is a moment when all pieces are collected together
+            // Note that each interim data structure keeps distinct set of data,
             // what is guaranteed by processing filters.  
             can(local.sl_lex_egress[key][tonumber(position)])
                 ? local.sl_lex_egress[key][tonumber(position)] 

@@ -84,7 +84,7 @@ locals {
 
 # add index variable to keep order of records
 # it's needed as processing is implemented for subsets of the list
-# having index field, it's possible to keep oryginal order in final list
+# having index field, it's possible to keep original order in final list
 locals {
   sl_indexed = {
     for key, value in local.sl_map : 
@@ -285,7 +285,7 @@ output "sl_error" {
 }
 
 # combine both partially processed list to the result
-# keep oryginal order
+# keep original order
 locals {
   sl_processed = {
     for key, value in local.sl_indexed : 

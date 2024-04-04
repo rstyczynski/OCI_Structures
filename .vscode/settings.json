@@ -1,0 +1,10 @@
+{
+    "cSpell.enableFiletypes": [
+        "hcl"
+    ],
+    "cSpell.words": [
+        "concat",
+        "formatlist",
+        "tonumber"
+    ]
+}
