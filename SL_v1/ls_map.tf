@@ -6,8 +6,8 @@ variable "sl_map" {
           rules = list(object(
             {
               protocol    = string
-              source      = optional(string)
-              destination = optional(string)
+              src      = optional(string)
+              dst = optional(string)
               description = optional(string)
               stateless   = optional(bool)
             })
@@ -21,25 +21,25 @@ variable "sl_map" {
       rules = [
         {
           protocol    = "tcp/22",
-          destination = "0.0.0.0/0",
+          dst = "0.0.0.0/0",
           description = "ssh for all!"
         },
         {
           protocol    = "tcp/80-90",
-          destination = "0.0.0.0/0"
+          dst = "0.0.0.0/0"
           stateless   = true,
         },
         {
           protocol    = "tcp/:1521-1523",
-          destination = "0.0.0.0/0"
+          dst = "0.0.0.0/0"
         },
         {
           protocol    = "TcP/22:",
-          source = "0.0.0.0/0"
+          src = "0.0.0.0/0"
         },
         {
           protocol    = "TcP/21-22:1521-1523",
-          source = "0.0.0.0/0"
+          src = "0.0.0.0/0"
         }
       ]
       },
@@ -47,24 +47,15 @@ variable "sl_map" {
         rules = [
           {
             protocol    = "icmp/3.4",
-            destination = "0.0.0.0/0"
+            dst = "0.0.0.0/0"
           },
           {
             protocol = "icmp/8",
-            source   = "0.0.0.0/0"
+            src   = "0.0.0.0/0"
           }
         ]
       }
     }
-}
-
-variable "ptc2code" {
-  type = map(string)
-  default = {
-    "TCP" = 6
-    "UDP" = 17
-    "ICMP" = 1
-  }
 }
 
 locals {
@@ -72,30 +63,65 @@ locals {
   //sl_map = local.sl_lex
 }
 
+#
+# known networks map. Register here CIDR labels
+#
+locals {
+    cidrs = {
+        "internet" = "0.0.0.0/0",
+        "on_premises" = "192.0.0.0/8",
+        "all_services" = "all_services"
+    }
+}
+
 variable sl_key {
   type = string
   default = "demo1"
 }
 
-# destination pattern to auto set destination type
+# dst pattern to auto set dst type
 locals {
   regexp_cidr = "([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\/([0-9]+)"
 }
+
+#
+# render CIDR from labels
+# 
+locals {
+  sl_cidr = {
+    for key, value in local.sl_map : 
+    key => {
+      rules = [
+        for ndx, rule in value.rules :
+        {
+          protocol    = can(rule.protocol) ? rule.protocol : null
+          src         = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? rule.src : can(local.cidrs[rule.src]) ? local.cidrs[rule.src] : "label not in local.cidrs"
+          dst         = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? rule.dst : can(local.cidrs[rule.dst]) ? local.cidrs[rule.dst] : "label not in local.cidrs"
+          description = can(rule.description) ? rule.description : null
+          stateless   = can(rule.stateless) ? rule.stateless : null
+        }
+      ]
+    }
+  }
+}
+// output "sl_cidr" {
+//   value = local.sl_cidr
+// }
 
 # add index variable to keep order of records
 # it's needed as processing is implemented for subsets of the list
 # having index field, it's possible to keep original order in final list
 locals {
   sl_indexed = {
-    for key, value in local.sl_map : 
+    for key, value in local.sl_cidr : 
     key => {
       rules = [
         for ndx, rule in value.rules :
         {
           _position   = ndx
           protocol    = can(rule.protocol) ? rule.protocol : null
-          source      = can(rule.source) ? rule.source : null
-          destination = can(rule.destination) ? rule.destination : null
+          src         = can(rule.src) ? rule.src : null
+          dst         = can(rule.dst) ? rule.dst : null
           description = can(rule.description) ? rule.description : null
           stateless   = can(rule.stateless) ? rule.stateless : null
         }
@@ -122,7 +148,7 @@ locals {
           {
             _position = tonumber(rule._position)
 
-            source_string = rule.protocol
+            src_string = rule.protocol
             src_port_min  = regex(local.regexp_full, rule.protocol)[1]
             src_port_max  = regex(local.regexp_full, rule.protocol)[2] != "" ? regex(local.regexp_full, rule.protocol)[2] : regex(local.regexp_full, rule.protocol)[1]
 
@@ -134,11 +160,11 @@ locals {
 
             protocol = lower(split("/", rule.protocol)[0])
 
-            source      = rule.source
-            source_type = rule.source == null ? null : can(regex(local.regexp_cidr, rule.source)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+            src      = rule.src
+            src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
-            destination      = rule.destination
-            destination_type = rule.destination == null ? null : can(regex(local.regexp_cidr, rule.destination)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+            dst      = rule.dst
+            dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
             stateless   = rule.stateless
             description = rule.description
@@ -166,7 +192,7 @@ locals {
         {
           _position = tonumber(rule._position)
 
-          source_string = rule.protocol
+          src_string = rule.protocol
           src_port_min  = null
           src_port_max  = null
 
@@ -178,11 +204,11 @@ locals {
 
           protocol = lower(split("/", rule.protocol)[0])
 
-          source      = rule.source
-          source_type = rule.source == null ? null : can(regex(local.regexp_cidr, rule.source)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+          src      = rule.src
+          src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
-          destination      = rule.destination
-          destination_type = rule.destination == null ? null : can(regex(local.regexp_cidr, rule.destination)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+          dst      = rule.dst
+          dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
           stateless   = rule.stateless
           description = rule.description
@@ -210,7 +236,7 @@ locals {
         {
           _position = tonumber(rule._position)
 
-          source_string = rule.protocol
+          src_string = rule.protocol
 
           src_port_min = null
           src_port_max = null
@@ -223,11 +249,11 @@ locals {
 
           protocol = lower(split("/", rule.protocol)[0])
 
-          source      = rule.source
-          source_type = rule.source == null ? null : can(regex(local.regexp_cidr, rule.source)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+          src      = rule.src
+          src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
-          destination      = rule.destination
-          destination_type = rule.destination == null ? null : can(regex(local.regexp_cidr, rule.destination)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+          dst      = rule.dst
+          dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
           stateless   = rule.stateless
           description = rule.description
@@ -251,7 +277,7 @@ locals {
       rules = [for rule in value.rules :
         {
           _position = tonumber(rule._position)
-          source_string = rule.protocol
+          src_string = rule.protocol
 
           src_port_min = 0
           src_port_max = null
@@ -264,11 +290,11 @@ locals {
           
           protocol = "ERROR"
 
-          source      = null
-          source_type = null
+          src      = null
+          src_type = null
           
-          destination      = null
-          destination_type = null
+          dst      = null
+          dst_type = null
 
           stateless   = null
           description = null
@@ -323,18 +349,18 @@ locals {
         for position in local.positions_per_key[key] : {
           _position = tonumber(position)
           _type = entry.rules[tonumber(position)].type
-          _source = entry.rules[tonumber(position)].source_string
+          _source = entry.rules[tonumber(position)].src_string
 
           description = entry.rules[tonumber(position)].description
 
           protocol    = upper(entry.rules[tonumber(position)].protocol)
           stateless   = entry.rules[tonumber(position)].stateless
 
-          source       = entry.rules[tonumber(position)].source
-          source_type  = entry.rules[tonumber(position)].source_type
+          src       = entry.rules[tonumber(position)].src
+          src_type  = entry.rules[tonumber(position)].src_type
 
-          destination = entry.rules[tonumber(position)].destination
-          destination_type = entry.rules[tonumber(position)].destination_type
+          dst = entry.rules[tonumber(position)].dst
+          dst_type = entry.rules[tonumber(position)].dst_type
         
           src_port_min = try(tonumber(entry.rules[tonumber(position)].src_port_min), null)
           src_port_max = entry.rules[tonumber(position)].src_port_max != "" ? try(tonumber(entry.rules[tonumber(position)].src_port_max),null) : try(tonumber(entry.rules[tonumber(position)].src_port_min),null)
@@ -361,18 +387,18 @@ locals {
         for position in local.positions_per_key[key] : {
           _position = tonumber(position)
           _type = entry.rules[tonumber(position)].type
-          _source = entry.rules[tonumber(position)].source_string
+          _source = entry.rules[tonumber(position)].src_string
 
           description = entry.rules[tonumber(position)].description
 
           protocol    = upper(entry.rules[tonumber(position)].protocol)
           stateless   = entry.rules[tonumber(position)].stateless
 
-          src       = entry.rules[tonumber(position)].source
-          src_type  = entry.rules[tonumber(position)].source_type
+          src       = entry.rules[tonumber(position)].src
+          src_type  = entry.rules[tonumber(position)].src_type
 
-          destination = entry.rules[tonumber(position)].destination
-          destination_type = entry.rules[tonumber(position)].destination_type
+          dst = entry.rules[tonumber(position)].dst
+          dst_type = entry.rules[tonumber(position)].dst_type
         
           src_port_min = try(tonumber(entry.rules[tonumber(position)].src_port_min), null)
           src_port_max = entry.rules[tonumber(position)].src_port_max != "" ? try(tonumber(entry.rules[tonumber(position)].src_port_max),null) : try(tonumber(entry.rules[tonumber(position)].src_port_min),null)
@@ -382,7 +408,7 @@ locals {
 
           icmp_type = try(tonumber(entry.rules[tonumber(position)].icmp_type), null)
           icmp_code = try(tonumber(entry.rules[tonumber(position)].icmp_code), null)
-        } if entry.rules[tonumber(position)].source != null
+        } if entry.rules[tonumber(position)].src != null
       ]
     } 
   }
@@ -399,15 +425,15 @@ locals {
         for position in local.positions_per_key[key] : {
           _position = tonumber(position)
           _type = entry.rules[tonumber(position)].type
-          _source = entry.rules[tonumber(position)].source_string
+          _source = entry.rules[tonumber(position)].src_string
 
           description = entry.rules[tonumber(position)].description
 
           protocol    = upper(entry.rules[tonumber(position)].protocol)
           stateless   = entry.rules[tonumber(position)].stateless
 
-          dst = entry.rules[tonumber(position)].destination
-          dst_type = entry.rules[tonumber(position)].destination_type
+          dst = entry.rules[tonumber(position)].dst
+          dst_type = entry.rules[tonumber(position)].dst_type
         
           src_port_min = try(tonumber(entry.rules[tonumber(position)].src_port_min), null)
           src_port_max = entry.rules[tonumber(position)].src_port_max != "" ? try(tonumber(entry.rules[tonumber(position)].src_port_max),null) : try(tonumber(entry.rules[tonumber(position)].src_port_min),null)
@@ -417,7 +443,7 @@ locals {
 
           icmp_type = try(tonumber(entry.rules[tonumber(position)].icmp_type), null)
           icmp_code = try(tonumber(entry.rules[tonumber(position)].icmp_code), null)
-        } if entry.rules[tonumber(position)].destination != null
+        } if entry.rules[tonumber(position)].dst != null
       ]
     } 
   }
