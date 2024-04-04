@@ -58,9 +58,12 @@ variable "sl_map" {
     }
 }
 
+#
+# Switch data source to enable sl_lex format
+#
 locals {
-  //sl_map = var.sl_map
-  sl_map = local.sl_lex
+  sl_map = var.sl_map
+  //sl_map = local.sl_lex
 }
 
 #
@@ -134,7 +137,7 @@ locals {
 // # /22-23:80
 // # /22-23:80-81
 locals {
-  regexp_full = "(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*):([0-9]*)-?([0-9]*)$"
+  regexp_full = format("%s\\s*%s", local.regexp_ip_ports_full, local.regexp_eos)
 
   sl_src_dst = {
     for key, value in local.sl_indexed :
@@ -156,10 +159,10 @@ locals {
             protocol = lower(split("/", rule.protocol)[0])
 
             src      = rule.src
-            src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+            src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
             dst      = rule.dst
-            dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+            dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
             stateless   = rule.stateless
             description = rule.description
@@ -178,7 +181,7 @@ locals {
 // # /80
 // # /80-81
 locals {
-  regexp_dst = "(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)$"
+  regexp_dst = format("%s\\s*%s", local.regexp_ip_ports_dst, local.regexp_eos)
 
   sl_dst_only = {
     for key, value in local.sl_indexed : 
@@ -200,10 +203,10 @@ locals {
           protocol = lower(split("/", rule.protocol)[0])
 
           src      = rule.src
-          src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+          src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
           dst      = rule.dst
-          dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+          dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
           stateless   = rule.stateless
           description = rule.description
@@ -222,7 +225,7 @@ locals {
 # icmp/8
 # icmp/8.1
 locals {
-  regexp_icmp = "(?i)(icmp)\\/([0-9]+).?([0-9]*)$"
+  regexp_icmp = format("%s\\s*%s", local.regexp_icmp_tc, local.regexp_eos)
 
   sl_icmp = {
     for key, value in local.sl_indexed : 
@@ -239,16 +242,16 @@ locals {
           dst_port_min = null
           dst_port_max = null
 
-          icmp_type = regex(local.regexp_icmp, rule.protocol)[1]
-          icmp_code = regex(local.regexp_icmp, rule.protocol)[2] != "" ? regex(local.regexp_icmp, rule.protocol)[2] : null
+          icmp_type = regex(local.regexp_icmp, rule.protocol)[0]
+          icmp_code = regex(local.regexp_icmp, rule.protocol)[1] != "" ? regex(local.regexp_icmp, rule.protocol)[1] : null
 
           protocol = lower(split("/", rule.protocol)[0])
 
           src      = rule.src
-          src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+          src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
           dst      = rule.dst
-          dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)[4]) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+          dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
           stateless   = rule.stateless
           description = rule.description

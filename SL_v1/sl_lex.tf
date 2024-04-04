@@ -40,14 +40,14 @@ locals {
     // both are workaround for lack of knowledge how to forbid ':' character after ports.
     // w/o above ingress_dst regexp matches generic regexp_ingress
     regexp_ingress_dst_cmt =  format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.regexp_comment)
-    regexp_ingress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.eos)
+    regexp_ingress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.regexp_eos)
 }
 
 # patterns for icmp
 locals {
-    regexp_icmp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.eos)
+    regexp_icmp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.regexp_eos)
     regexp_icmp_egress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.regexp_comment)
-    regexp_icmp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.eos)
+    regexp_icmp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.regexp_eos)
     regexp_icmp_ingress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.regexp_comment)
 }
 
