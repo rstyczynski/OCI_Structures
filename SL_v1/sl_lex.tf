@@ -25,41 +25,30 @@ variable "sl_lex" {
 //     value = var.sl_lex
 // }
 
-# general regexp patterns
-locals {
-  cidr = "([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\/[0-9]{1,3})"
-  label = "([\\w\\.\\/]+)"
-  ip_ports_dst = "(?i)(tcp|udp)\\/([0-9]*)-?([0-9]*)"
-  ip_ports_full = format("%s:%s",local.ip_ports_dst,"([0-9]*)-?([0-9]*)")
-  icmp_tc = "(?i)icmp\\/([0-9]*).?([0-9]*)"
-  state = "(>{1,2})"
-  comment = "(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)"
-  comment_option = "(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)?"
-  eos = "$"
-}
+
 #  pattern to decode lexical rule
 locals {
-    regexp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.ip_ports_full, local.state, local.label, local.comment_option)
-    regexp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.label, local.state, local.ip_ports_full, local.comment_option)
+    regexp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_ip_ports_full, local.regexp_state, local.regexp_label, local.regexp_comment_option)
+    regexp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_full, local.regexp_comment_option)
 }
 
 # patterns for special case of dst only
 locals {
-    regexp_egress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.ip_ports_dst, local.state, local.cidr, local.comment_option)
+    regexp_egress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_ip_ports_dst, local.regexp_state, local.regexp_label, local.regexp_comment_option)
     // regexp_ingress_dst_cmt takes full syntax with comments
     // regexp_ingress_dst is ended by $
     // both are workaround for lack of knowledge how to forbid ':' character after ports.
     // w/o above ingress_dst regexp matches generic regexp_ingress
-    regexp_ingress_dst_cmt =  format("%s\\s*%s\\s*%s\\s*%s",local.cidr, local.state, local.ip_ports_dst, local.comment)
-    regexp_ingress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.cidr, local.state, local.ip_ports_dst, local.eos)
+    regexp_ingress_dst_cmt =  format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.regexp_comment)
+    regexp_ingress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.eos)
 }
 
 # patterns for icmp
 locals {
-    regexp_icmp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.icmp_tc, local.state, local.cidr, local.eos)
-    regexp_icmp_egress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.icmp_tc, local.state, local.cidr, local.comment)
-    regexp_icmp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.cidr, local.state, local.icmp_tc, local.eos)
-    regexp_icmp_ingress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.cidr, local.state, local.icmp_tc, local.comment)
+    regexp_icmp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.eos)
+    regexp_icmp_egress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.regexp_comment)
+    regexp_icmp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.eos)
+    regexp_icmp_ingress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.regexp_comment)
 }
 
 # add index variable to keep order of records

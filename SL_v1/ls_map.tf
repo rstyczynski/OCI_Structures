@@ -59,8 +59,8 @@ variable "sl_map" {
 }
 
 locals {
-  sl_map = var.sl_map
-  //sl_map = local.sl_lex
+  //sl_map = var.sl_map
+  sl_map = local.sl_lex
 }
 
 #
@@ -77,11 +77,6 @@ locals {
 variable sl_key {
   type = string
   default = "demo1"
-}
-
-# dst pattern to auto set dst type
-locals {
-  regexp_cidr = "([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\/([0-9]+)"
 }
 
 #
