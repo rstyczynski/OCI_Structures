@@ -5,7 +5,7 @@ This library proposes two formats:
 1. One line per access rule
 
 ```
-    0.0.0.0/0 >> tcp/1521-1523 /* DB access for everybody! */
+    accept tcp/1521-1523 from 0.0.0.0/0 /* DB access for everybody! */
 ```
 
 2. Optimized protocol and port numbers
@@ -64,8 +64,6 @@ with expected answer:
     sl_egress OK
     sl_ingress OK
 ```
-
-
 
 # Change list
 
