@@ -8,5 +8,5 @@ locals {
   regexp_state = "(>{1,2})"
   regexp_comment = "(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)"
   regexp_comment_option = "(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)?"
-  regexp_eos = "$"
+  regexp_eol = "$"
 }

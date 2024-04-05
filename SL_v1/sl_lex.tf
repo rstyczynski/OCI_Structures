@@ -4,7 +4,7 @@ variable "sl_lex" {
   default = {
       "demo1" = [
         "TcP/21-22:1521-1523 >> on_premises /* DB for some of you */",
-        "0.0.0.0/0      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
+        "inte:rnet      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
         "tcp/:1521-1523 > 0.0.0.0/0",
         "0.0.0.0/0      >> uDP/22-23 /* strange ingress udp */",
         "tcp/22         >> 0.0.0.0/0 /* ssh for all! */",
@@ -28,27 +28,27 @@ variable "sl_lex" {
 
 #  pattern to decode lexical rule
 locals {
-    regexp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_ip_ports_full, local.regexp_state, local.regexp_label, local.regexp_comment_option)
-    regexp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_full, local.regexp_comment_option)
+    regexp_egress = format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_ip_ports_full, local.regexp_state, local.regexp_label, local.regexp_comment_option)
+    regexp_ingress = format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_full, local.regexp_comment_option)
 }
 
 # patterns for special case of dst only
 locals {
-    regexp_egress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_ip_ports_dst, local.regexp_state, local.regexp_label, local.regexp_comment_option)
+    regexp_egress_dst = format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_ip_ports_dst, local.regexp_state, local.regexp_label, local.regexp_comment_option)
     // regexp_ingress_dst_cmt takes full syntax with comments
     // regexp_ingress_dst is ended by $
     // both are workaround for lack of knowledge how to forbid ':' character after ports.
     // w/o above ingress_dst regexp matches generic regexp_ingress
-    regexp_ingress_dst_cmt =  format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.regexp_comment)
-    regexp_ingress_dst = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.regexp_eos)
+    regexp_ingress_dst_cmt =  format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.regexp_comment)
+    regexp_ingress_dst = format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_ip_ports_dst, local.regexp_eol)
 }
 
 # patterns for icmp
 locals {
-    regexp_icmp_egress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.regexp_eos)
-    regexp_icmp_egress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.regexp_comment)
-    regexp_icmp_ingress = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.regexp_eos)
-    regexp_icmp_ingress_cmt = format("%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.regexp_comment)
+    regexp_icmp_egress = format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.regexp_eol)
+    regexp_icmp_egress_cmt = format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_state, local.regexp_label, local.regexp_comment)
+    regexp_icmp_ingress = format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.regexp_eol)
+    regexp_icmp_ingress_cmt = format("^%s\\s*%s\\s*%s\\s*%s",local.regexp_label, local.regexp_state, local.regexp_icmp_tc, local.regexp_comment)
 }
 
 # add index variable to keep order of records
@@ -71,7 +71,7 @@ locals {
 // }
 
 locals {
-  sl_lex_egress_error = {
+  sl_lex_error = {
     "0" = {
             _position   = -1
             _format = "error"
@@ -387,13 +387,13 @@ locals {
                                             ? local.sl_lex_icmp_egress[key][tonumber(position)] 
                                             : can(local.sl_lex_icmp_egress_cmt[key][tonumber(position)])
                                                 ? local.sl_lex_icmp_egress_cmt[key][tonumber(position)] 
-                                                : local.sl_lex_egress_error[0]
+                                                : local.sl_lex_error[0]
       ]
     } 
   }
 }
-output "result_sl_lex" {
-  value = local.sl_lex
-}
+// output "result_sl_lex" {
+//   value = local.sl_lex
+// }
 
 

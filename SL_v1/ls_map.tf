@@ -21,7 +21,7 @@ variable "sl_map" {
       rules = [
         {
           protocol    = "tcp/22",
-          dst = "0.0.0.0/0",
+          dst = "internet",
           description = "ssh for all!"
         },
         {
@@ -61,7 +61,7 @@ variable "sl_map" {
 # select data source to enable sl_lex format
 variable data_format {
   type = string
-  default = "sl_map"
+  default = "sl_lex" // sl_lex to use lex format
 }
 
 # select key for output ingress and egress lists
@@ -148,13 +148,13 @@ locals {
 // # /22-23:80
 // # /22-23:80-81
 locals {
-  regexp_full = format("%s\\s*%s", local.regexp_ip_ports_full, local.regexp_eos)
+  regexp_full = format("^%s\\s*%s", local.regexp_ip_ports_full, local.regexp_eol)
 
   sl_src_dst = {
     for key, value in local.sl_indexed :
       key => {
-        rules = [for rule in value.rules :
-          {
+        for rule in value.rules :
+          rule._position => {
             _position = tonumber(rule._position)
 
             src_string = rule.protocol
@@ -179,10 +179,9 @@ locals {
             description = rule.description
 
             type = "sl_src_dst"
-          } if can(regex(local.regexp_full, rule.protocol))
-        ]
-      }
+        } if can(regex(local.regexp_full, rule.protocol)) 
     }
+  }
 }
 // output "sl_src_dst" {
 //   value = local.sl_src_dst
@@ -192,40 +191,39 @@ locals {
 // # /80
 // # /80-81
 locals {
-  regexp_dst = format("%s\\s*%s", local.regexp_ip_ports_dst, local.regexp_eos)
+  regexp_dst = format("^%s\\s*%s", local.regexp_ip_ports_dst, local.regexp_eol)
 
   sl_dst_only = {
     for key, value in local.sl_indexed : 
       key => { 
-      rules = [for rule in value.rules :
-        {
-          _position = tonumber(rule._position)
+        for rule in value.rules :
+          rule._position => {
+            _position = tonumber(rule._position)
 
-          src_string = rule.protocol
-          src_port_min  = null
-          src_port_max  = null
+            src_string = rule.protocol
+            src_port_min  = null
+            src_port_max  = null
 
-          dst_port_min = regex(local.regexp_dst, rule.protocol)[1]
-          dst_port_max = regex(local.regexp_dst, rule.protocol)[2] != "" ? regex(local.regexp_dst, rule.protocol)[2] : regex(local.regexp_dst, rule.protocol)[1]
+            dst_port_min = regex(local.regexp_dst, rule.protocol)[1]
+            dst_port_max = regex(local.regexp_dst, rule.protocol)[2] != "" ? regex(local.regexp_dst, rule.protocol)[2] : regex(local.regexp_dst, rule.protocol)[1]
 
-          icmp_type = null
-          icmp_code = null
+            icmp_type = null
+            icmp_code = null
 
-          protocol = lower(split("/", rule.protocol)[0])
+            protocol = lower(split("/", rule.protocol)[0])
 
-          src      = rule.src
-          src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+            src      = rule.src
+            src_type = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
-          dst      = rule.dst
-          dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
+            dst      = rule.dst
+            dst_type = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? "CIDR_BLOCK" : "SERVICE_CIDR_BLOCK"
 
-          stateless   = rule.stateless
-          description = rule.description
+            stateless   = rule.stateless
+            description = rule.description
 
-          type = "sl_dst_only"
-        } if can(regex(local.regexp_dst, rule.protocol))
-      ]
-    }
+            type = "sl_dst_only" 
+          } if can(regex(local.regexp_dst, rule.protocol))
+      }
   }
 }
 // output "sl_dst_only" {
@@ -236,13 +234,13 @@ locals {
 # icmp/8
 # icmp/8.1
 locals {
-  regexp_icmp = format("%s\\s*%s", local.regexp_icmp_tc, local.regexp_eos)
+  regexp_icmp = format("^%s\\s*%s", local.regexp_icmp_tc, local.regexp_eol)
 
   sl_icmp = {
     for key, value in local.sl_indexed : 
       key => {
-      rules = [for rule in value.rules :
-        {
+      for rule in value.rules :
+        rule._position => {
           _position = tonumber(rule._position)
 
           src_string = rule.protocol
@@ -268,11 +266,10 @@ locals {
           description = rule.description
 
           type          = "sl_icmp"
-        } if can(regex(local.regexp_icmp, rule.protocol))
-      ]
+       } if can(regex(local.regexp_icmp, rule.protocol))
+      }
     }
   }
-}
 // output "sl_icmp" {
 //   value = local.sl_icmp
 // }
@@ -283,65 +280,44 @@ locals {
   sl_error = {
     for key, value in local.sl_indexed : 
       key => {
-      rules = [for rule in value.rules :
-        {
-          _position = tonumber(rule._position)
-          src_string = rule.protocol
+      for rule in value.rules :
+        rule._position => {
+            _position = tonumber(rule._position)
+            src_string = rule.protocol
 
-          src_port_min = 0
-          src_port_max = null
+            src_port_min = 0
+            src_port_max = null
 
-          dst_port_min = 0
-          dst_port_max = null
+            dst_port_min = 0
+            dst_port_max = null
 
-          icmp_type = null
-          icmp_code = null
-          
-          protocol = "ERROR"
+            icmp_type = null
+            icmp_code = null
+            
+            protocol = "ERROR"
 
-          src      = null
-          src_type = null
-          
-          dst      = null
-          dst_type = null
+            src      = null
+            src_type = null
+            
+            dst      = null
+            dst_type = null
 
-          stateless   = null
-          description = null
+            stateless   = null
+            description = null
 
-          type         = "sl_error"
-        //} if ! startswith(lower(rule.protocol), "tcp") && ! startswith(lower(rule.protocol), "udp") && ! startswith(lower(rule.protocol), "icmp")
-        } if ! can(regex(local.regexp_full, rule.protocol)) && ! can(regex(local.regexp_dst, rule.protocol)) && ! can(regex(local.regexp_icmp, rule.protocol))
-      ]
+            type         = "sl_error"
+          } if ! can(regex(local.regexp_full, rule.protocol)) && ! can(regex(local.regexp_dst, rule.protocol)) && ! can(regex(local.regexp_icmp, rule.protocol))
+        }
+      }
     }
-  }
-}
 output "sl_error" {
   value = local.sl_error
 }
 
-# combine both partially processed list to the result
-# keep original order
-locals {
-  sl_processed = {
-    for key, value in local.sl_indexed : 
-      key => {
-      rules = flatten(concat(
-          local.sl_src_dst[key].rules,
-          local.sl_dst_only[key].rules,
-          local.sl_icmp[key].rules,
-          local.sl_error[key].rules
-        ))
-      }
-    }
-}
-// output "sl_processed" {
-//   value = local.sl_processed
-// }
-
 locals {
   // generate sorted positions for each key
   positions_per_key = {
-    for key, value in local.sl_processed : 
+    for key, value in local.sl_indexed : 
       key =>
       sort(formatlist("%010d", [for rule in value.rules : rule._position]))
   }
@@ -349,6 +325,35 @@ locals {
 // output "positions_per_key" {
 //   value = local.positions_per_key
 // }
+
+# combine both partially processed list to the result list
+# keep original order
+
+# TODO. This lost order! Use techniques from lex! 
+locals {
+  sl_processed = {
+    for key, value in local.sl_indexed : 
+      key => {
+        rules = [
+          for position in local.positions_per_key[key]:
+            can(local.sl_src_dst[key][tonumber(position)])
+              ? local.sl_src_dst[key][tonumber(position)]
+              : can(local.sl_dst_only[key][tonumber(position)])
+                  ? local.sl_dst_only[key][tonumber(position)]
+                  : can(local.sl_icmp[key][tonumber(position)])
+                      ? local.sl_icmp[key][tonumber(position)]
+                      : can(local.sl_error[key][tonumber(position)])
+                          ? local.sl_error[key][tonumber(position)]
+                          : null
+        ]
+      }
+    }
+}
+// output "sl_processed" {
+//   value = local.sl_processed
+// }
+
+
 
 locals {
   sl = {
@@ -388,78 +393,6 @@ output "sl" {
   value = local.sl
 }
 
-locals {
-  sl_ingress = {
-    for key, entry in local.sl_processed :
-      key => {
-      rules = [
-        for position in local.positions_per_key[key] : {
-          _position = tonumber(position)
-          _type = entry.rules[tonumber(position)].type
-          _source = entry.rules[tonumber(position)].src_string
-
-          description = entry.rules[tonumber(position)].description
-
-          protocol    = upper(entry.rules[tonumber(position)].protocol)
-          stateless   = entry.rules[tonumber(position)].stateless
-
-          src       = entry.rules[tonumber(position)].src
-          src_type  = entry.rules[tonumber(position)].src_type
-
-          dst = entry.rules[tonumber(position)].dst
-          dst_type = entry.rules[tonumber(position)].dst_type
-        
-          src_port_min = try(tonumber(entry.rules[tonumber(position)].src_port_min), null)
-          src_port_max = entry.rules[tonumber(position)].src_port_max != "" ? try(tonumber(entry.rules[tonumber(position)].src_port_max),null) : try(tonumber(entry.rules[tonumber(position)].src_port_min),null)
-
-          dst_port_min = try(tonumber(entry.rules[tonumber(position)].dst_port_min), null)
-          dst_port_max = entry.rules[tonumber(position)].dst_port_max != "" ? try(tonumber(entry.rules[tonumber(position)].dst_port_max),null) : try(tonumber(entry.rules[tonumber(position)].dst_port_min),null)
-
-          icmp_type = try(tonumber(entry.rules[tonumber(position)].icmp_type), null)
-          icmp_code = try(tonumber(entry.rules[tonumber(position)].icmp_code), null)
-        } if entry.rules[tonumber(position)].src != null
-      ]
-    } 
-  }
-}
-// output "sl_ingress" {
-//   value = local.sl_ingress
-// }
-
-locals {
-  sl_egress = {
-    for key, entry in local.sl_processed :
-      key => {
-      rules = [
-        for position in local.positions_per_key[key] : {
-          _position = tonumber(position)
-          _type = entry.rules[tonumber(position)].type
-          _source = entry.rules[tonumber(position)].src_string
-
-          description = entry.rules[tonumber(position)].description
-
-          protocol    = upper(entry.rules[tonumber(position)].protocol)
-          stateless   = entry.rules[tonumber(position)].stateless
-
-          dst = entry.rules[tonumber(position)].dst
-          dst_type = entry.rules[tonumber(position)].dst_type
-        
-          src_port_min = try(tonumber(entry.rules[tonumber(position)].src_port_min), null)
-          src_port_max = entry.rules[tonumber(position)].src_port_max != "" ? try(tonumber(entry.rules[tonumber(position)].src_port_max),null) : try(tonumber(entry.rules[tonumber(position)].src_port_min),null)
-
-          dst_port_min = try(tonumber(entry.rules[tonumber(position)].dst_port_min), null)
-          dst_port_max = entry.rules[tonumber(position)].dst_port_max != "" ? try(tonumber(entry.rules[tonumber(position)].dst_port_max),null) : try(tonumber(entry.rules[tonumber(position)].dst_port_min),null)
-
-          icmp_type = try(tonumber(entry.rules[tonumber(position)].icmp_type), null)
-          icmp_code = try(tonumber(entry.rules[tonumber(position)].icmp_code), null)
-        } if entry.rules[tonumber(position)].dst != null
-      ]
-    } 
-  }
-}
-// output "sl_egress" {
-//   value = local.sl_egress
-// }
 
 provider "null" {
   version = "~> 3.0"

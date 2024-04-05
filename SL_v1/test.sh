@@ -2,6 +2,8 @@
 
 source ../lib/tf_tests.sh
 
+export TF_VAR_data_format="sl_map"
+
 export TF_VAR_sl_map='
   {
     test1 = {
@@ -522,6 +524,7 @@ expect_tf_answer sl_ingress '
 '
 unset TF_VAR_sl_map
 unset TF_VAR_sl_key
+unset TF_VAR_data_format
 unset output_name
 unset expect_mode
 
