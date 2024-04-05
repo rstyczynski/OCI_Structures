@@ -29,7 +29,11 @@ export TF_VAR_sl_map='
 expect_mode=json
 output_name=sl
 export TF_VAR_sl_key=test1
-expect_tf_answer sl_simple '{
+# parameter is expected json
+# take it executing:
+# expect_tf_answer sl_simple ''; show_received_json
+expect_tf_answer sl_simple '
+{
   "test1": {
     "rules": [
       {
@@ -136,6 +140,9 @@ export TF_VAR_sl_map='
 expect_mode=json
 output_name=sl
 export TF_VAR_sl_key=test1
+# parameter is expected json
+# take it executing:
+# expect_tf_answer sl ''; show_received_json
 expect_tf_answer sl '{
   "test1": {
     "rules": [
@@ -348,6 +355,9 @@ expect_tf_answer sl '{
 
 export TF_VAR_sl_key=test1
 output_name=sl_egress_key
+# parameter is expected json
+# take it executing:
+# expect_tf_answer sl_egress ''; show_received_json
 expect_tf_answer sl_egress '
 [
   {
@@ -484,6 +494,9 @@ expect_tf_answer sl_egress '
 export TF_VAR_sl_key=test2
 expect_mode=json
 output_name=sl_ingress_key
+# parameter is expected json
+# take it executing:
+# expect_tf_answer sl_ingress ''; show_received_json
 expect_tf_answer sl_ingress '
 [
   {
