@@ -70,13 +70,14 @@ locals {
 //     value = local.sl_lex_indexed
 // }
 
+# 
 locals {
-  sl_lex_error = {
-    "0" = {
+  sl_critical_error = {
+    "error" = {
             _position   = -1
             _format = "error"
-            description = "Processing error."
-            protocol = "error/0"
+            description = "Critical processing error. Record does not processed by any routine."
+            protocol = null
             src      = null
             dst = null
             stateless = null
@@ -387,7 +388,7 @@ locals {
                                             ? local.sl_lex_icmp_egress[key][tonumber(position)] 
                                             : can(local.sl_lex_icmp_egress_cmt[key][tonumber(position)])
                                                 ? local.sl_lex_icmp_egress_cmt[key][tonumber(position)] 
-                                                : local.sl_lex_error[0]
+                                                : local.sl_critical_error["error"]
       ]
     } 
   }

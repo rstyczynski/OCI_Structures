@@ -274,7 +274,6 @@ locals {
 //   value = local.sl_icmp
 // }
 
-# TODO 1. Implement error handling
 # process error
 locals {
   sl_error = {
@@ -305,7 +304,7 @@ locals {
             stateless   = null
             description = null
 
-            type         = "sl_error"
+            type         = "sl_unrecognized"
           } if ! can(regex(local.regexp_full, rule.protocol)) && ! can(regex(local.regexp_dst, rule.protocol)) && ! can(regex(local.regexp_icmp, rule.protocol))
         }
       }
@@ -328,8 +327,6 @@ locals {
 
 # combine both partially processed list to the result list
 # keep original order
-
-# TODO. This lost order! Use techniques from lex! 
 locals {
   sl_processed = {
     for key, value in local.sl_indexed : 
@@ -344,7 +341,7 @@ locals {
                       ? local.sl_icmp[key][tonumber(position)]
                       : can(local.sl_error[key][tonumber(position)])
                           ? local.sl_error[key][tonumber(position)]
-                          : null
+                          : local.sl_critical_error["error"]
         ]
       }
     }
@@ -352,8 +349,6 @@ locals {
 // output "sl_processed" {
 //   value = local.sl_processed
 // }
-
-
 
 locals {
   sl = {
