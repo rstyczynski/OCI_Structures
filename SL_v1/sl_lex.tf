@@ -94,7 +94,7 @@ locals {
             src      = null
             dst = regex(local.regexp_egress, record.rule)[6]
             description = regex(local.regexp_egress, record.rule)[7]
-            stateless   = regex(local.regexp_egress, record.rule)[5] == ">>" ? true : regex(local.regexp_egress, record.rule)[5] == ">" ? false : null
+            stateless   = regex(local.regexp_egress, record.rule)[5] == ">>" ? false : regex(local.regexp_egress, record.rule)[5] == ">" ? true : null
         } if can(regex(local.regexp_egress, record.rule))
     } 
   } 
@@ -126,7 +126,7 @@ locals {
             src = regex(local.regexp_ingress, record.rule)[0]
             dst = null
             description = regex(local.regexp_ingress, record.rule)[7]
-            stateless   = regex(local.regexp_ingress, record.rule)[1] == ">>" ? true : regex(local.regexp_ingress, record.rule)[1] == ">" ? false : null
+            stateless   = regex(local.regexp_ingress, record.rule)[1] == ">>" ? false : regex(local.regexp_ingress, record.rule)[1] == ">" ? true : null
         } if can(regex(local.regexp_ingress, record.rule))
     } 
   } 
@@ -155,7 +155,7 @@ locals {
             src      = null
             dst = regex(local.regexp_egress_dst, record.rule)[4]
             description = regex(local.regexp_egress_dst, record.rule)[5]
-            stateless   = regex(local.regexp_egress_dst, record.rule)[3] == ">>" ? true : regex(local.regexp_egress_dst, record.rule)[3] == ">" ? false : null
+            stateless   = regex(local.regexp_egress_dst, record.rule)[3] == ">>" ? false : regex(local.regexp_egress_dst, record.rule)[3] == ">" ? true : null
         } if can(regex(local.regexp_egress_dst, record.rule))
     } 
   } 
@@ -184,7 +184,7 @@ locals {
             src = regex(local.regexp_ingress_dst, record.rule)[0]
             dst = null
             description = null
-            stateless   = regex(local.regexp_ingress_dst, record.rule)[1] == ">>" ? true : regex(local.regexp_ingress_dst, record.rule)[1] == ">" ? false : null
+            stateless   = regex(local.regexp_ingress_dst, record.rule)[1] == ">>" ? false : regex(local.regexp_ingress_dst, record.rule)[1] == ">" ? true : null
         } if can(regex(local.regexp_ingress_dst, record.rule))
     } 
   } 
@@ -213,7 +213,7 @@ locals {
             src = regex(local.regexp_ingress_dst_cmt, record.rule)[0]
             dst = null
             description = regex(local.regexp_ingress_dst_cmt, record.rule)[5]
-            stateless   = regex(local.regexp_ingress_dst_cmt, record.rule)[1] == ">>" ? true : regex(local.regexp_ingress_dst_cmt, record.rule)[1] == ">" ? false : null
+            stateless   = regex(local.regexp_ingress_dst_cmt, record.rule)[1] == ">>" ? false : regex(local.regexp_ingress_dst_cmt, record.rule)[1] == ">" ? true : null
         } if can(regex(local.regexp_ingress_dst_cmt, record.rule))
     }
   } 
@@ -241,6 +241,7 @@ locals {
             src = regex(local.regexp_icmp_ingress_cmt, record.rule)[0]
             dst = null
             description = regex(local.regexp_icmp_ingress_cmt, record.rule)[4]
+            stateless   = regex(local.regexp_icmp_ingress_cmt, record.rule)[1] == ">>" ? false : regex(local.regexp_icmp_ingress_cmt, record.rule)[1] == ">" ? true : null
         } if can(regex(local.regexp_icmp_ingress_cmt, record.rule))
     }
   } 
@@ -268,6 +269,7 @@ locals {
             src = regex(local.regexp_icmp_ingress, record.rule)[0]
             dst = null
             description = null
+            stateless   = regex(local.regexp_icmp_ingress, record.rule)[1] == ">>" ? false : regex(local.regexp_icmp_ingress, record.rule)[1] == ">" ? true : null
         } if can(regex(local.regexp_icmp_ingress, record.rule))
     }
   } 
@@ -297,6 +299,8 @@ locals {
             dst = regex(local.regexp_icmp_egress_cmt, record.rule)[3]
 
             description = regex(local.regexp_icmp_egress_cmt, record.rule)[4]
+            stateless   = regex(local.regexp_icmp_egress_cmt, record.rule)[2] == ">>" ? false : regex(local.regexp_icmp_egress_cmt, record.rule)[2] == ">" ? true : null
+
         } if can(regex(local.regexp_icmp_egress_cmt, record.rule))
     }
   } 
@@ -325,6 +329,7 @@ locals {
             dst = regex(local.regexp_icmp_egress, record.rule)[3]
 
             description = null
+            stateless   = regex(local.regexp_icmp_egress, record.rule)[2] == ">>" ? false : regex(local.regexp_icmp_egress, record.rule)[2] == ">" ? true : null
         } if can(regex(local.regexp_icmp_egress, record.rule))
     }
   } 
@@ -346,7 +351,7 @@ locals {
 // }
 
 locals {
-  sl_lex = {
+  sl_lex_map = {
     for key, entry in local.sl_lex_indexed :
       key => {
       rules = [
@@ -379,8 +384,8 @@ locals {
     } 
   }
 }
-output "sl_lex" {
-  value = local.sl_lex
+output "sl_lex_map" {
+  value = local.sl_lex_map
 }
 
 

@@ -1,6 +1,5 @@
 # TODO
 2. Extend test.sh with error cases
-5. Change lex scheme to >> cidr, cidr >>
 7. 
 
 100. add support for IPv6 at regexp_cidr / destination_type
@@ -55,11 +54,16 @@ tcp/1521-1523 >> 10.20.30.40/10 /* ssh for almost all! */
 4. 10.20.30.40/10
 5. ssh for almost all! 
 
-## 5. Change lex scheme to >> cidr, cidr >>
+## 5. Change lex scheme to allow tcp to, permit tcp from...
 
+```
 >> on_premises TcP/21-22:1521-1523 /* on-prem DB for all! */"
 on_premises >> TcP/21-22:1521-1523 /* Cloud DB for on-prem apps */"
+```
 
-
+```
+stateless permit TcP/21-22:1521-1523 to on_premises /* on-prem DB for all! */"
+stateless accept TcP/21-22:1521-1523 from on_premises /* Cloud DB for on-prem apps */"
+```
 
 

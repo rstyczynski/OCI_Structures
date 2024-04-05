@@ -6,6 +6,7 @@ locals {
   regexp_ip_ports_full = format("%s:%s",local.regexp_ip_ports_dst,"([0-9]*)-?([0-9]*)")
   regexp_icmp_tc = "(?i)icmp\\/([0-9]*).?([0-9]*)"
   regexp_state = "(>{1,2})"
+  regexp_stateless = "(stateless)*"
   regexp_comment = "(?:\\/\\*\\s*)?(?:([\\w !,]*))(?:\\*\\/)"
   regexp_comment_option = "(?:\\/\\*\\s*)?(?:([\\w !,]*))(?:\\*\\/)?"
   regexp_eol = "$"
@@ -25,4 +26,4 @@ locals {
             stateless = null
         } 
     } 
-} 
+}

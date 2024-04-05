@@ -61,7 +61,7 @@ variable "sl_map" {
 # select data source to enable sl_lex format
 variable data_format {
   type = string
-  default = "sl_lex" // sl_lex to use lex format; ls_map otherwise.
+  default = "sl_lang" // sl_lex to use lex format; ls_map otherwise.
 }
 
 # select key for output ingress and egress lists
@@ -90,7 +90,7 @@ variable cidrs {
 # switch data source to enable sl_lex format
 #
 locals {
-  sl_map = var.data_format == "sl_map" ? var.sl_map : local.sl_lex
+  sl_map = var.data_format == "sl_map" ? var.sl_map : var.data_format == "sl_lex" ? local.sl_lex_map : var.data_format == "sl_lang" ? local.sl_lang_map : null
 }
 
 #

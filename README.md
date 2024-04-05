@@ -36,7 +36,7 @@ The access list is kept in a map of objects with key representing set of access 
     local.sl_egress["SL_NAME"].rules
 ```
 
-## Unit test test
+## Unit test
 *Note: Unit test is just a draft now, but the working one.*
 
 Unit testing is implemented using:
@@ -68,6 +68,14 @@ with expected answer:
 
 
 # Change list
+
+## 5. Change lex scheme to allow tcp to, permit tcp from...
+Natural language syntax is accepted now.
+
+```
+permit tcp/21-22:1521-1523 to on_premises stateless /* DB for some of you */",
+accept udp/20000-30000:80-90 from internet stateless /* HTTP over UDP for some of you */
+```
 
 ## 6. Extend test.sh with lex use case
 
