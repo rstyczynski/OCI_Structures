@@ -10,11 +10,11 @@ export TF_VAR_sl_map='
         "protocol": "tcp/22",
         "dst": "0.0.0.0/0"
         "description": "ssh for everybody!",
-        "stateless": true,
+        "stateless": "true",
         },
         {
           "protocol": "tcp/8080",
-          "dst": "0.0.0.0/0"
+          "dst": "all_services"
         }
       ]
     }
@@ -42,15 +42,15 @@ expect_tf_answer sl_simple '{
         "src_type": null,
         "src_port_max": null,
         "src_port_min": null,
-        "stateless": true
+        "stateless": "true"
       },
       {
         "_position": 1,
         "_source": "tcp/8080",
         "_type": "sl_dst_only",
         "description": null,
-        "dst": "0.0.0.0/0",
-        "dst_type": "CIDR_BLOCK",
+        "dst": "all_services",
+        "dst_type": "SERVICE_CIDR_BLOCK",
         "dst_port_max": 8080,
         "dst_port_min": 8080,
         "icmp_code": null,
@@ -76,7 +76,7 @@ export TF_VAR_sl_map='
         "protocol": "tcp/22",
         "dst": "0.0.0.0/0"
         "description": "ssh for everybody!",
-        "stateless": true,
+        "stateless": "true",
         },
         {
           "protocol": "tcp/8080",
@@ -205,7 +205,7 @@ expect_tf_answer sl '
         "src_type": null,
         "src_port_max": null,
         "src_port_min": null,
-        "stateless": true
+        "stateless": "true"
       },
       {
         "_position": 4,
@@ -408,7 +408,7 @@ expect_tf_answer sl_egress '
     "protocol": "TCP",
     "src_port_max": null,
     "src_port_min": null,
-    "stateless": true
+    "stateless": "true"
   },
   {
     "_position": 4,
