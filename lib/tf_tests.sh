@@ -44,3 +44,7 @@ function expect_tf_answer() {
         cat $tmp/result.tmp
     fi
 }
+
+function show_received_json() {
+    cat $tmp/received_json.tmp
+}

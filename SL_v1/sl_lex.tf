@@ -4,12 +4,13 @@ variable "sl_lex" {
   default = {
       "demo1" = [
         "TcP/21-22:1521-1523 >> on_premises /* DB for some of you */",
-        "inte:rnet      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
+        "internet      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
         "tcp/:1521-1523 > 0.0.0.0/0",
         "0.0.0.0/0      >> uDP/22-23 /* strange ingress udp */",
         "tcp/22         >> 0.0.0.0/0 /* ssh for all! */",
         "0.0.0.0/0      > TcP/21-22:1521-1523 /* DB for everyone */" ,
         "tcp/80-90      >  0.0.0.0/0 /* stateless extended http */",
+        "tcp/:22         >> 0.0.0.0/0 /* ssh for all! */",
         "0.0.0.0/0      >> uDP/222-223",
       ],
       "demo2" = [
@@ -70,21 +71,6 @@ locals {
 //     value = local.sl_lex_indexed
 // }
 
-# 
-locals {
-  sl_critical_error = {
-    "error" = {
-            _position   = -1
-            _format = "error"
-            description = "Critical processing error. Record does not processed by any routine."
-            protocol = null
-            src      = null
-            dst = null
-            stateless = null
-        } 
-    } 
-} 
-
 # process generic egress pattern
 locals {
   sl_lex_egress = {
@@ -98,12 +84,12 @@ locals {
             _regexp     = local.regexp_egress
 
             # try egress generic
-            protocol    = format("%s/%s-%s:%s-%s",
+            protocol    = format("%s/%s%s:%s%s",
                 regex(local.regexp_egress, record.rule)[0], # protocol
                 regex(local.regexp_egress, record.rule)[1], # src_min
-                regex(local.regexp_egress, record.rule)[2], # src_max
+                regex(local.regexp_egress, record.rule)[2] != "" ? format("-%s",regex(local.regexp_egress, record.rule)[2]) : "", # src_max
                 regex(local.regexp_egress, record.rule)[3], # dst_min
-                regex(local.regexp_egress, record.rule)[4]  # dst_max
+                regex(local.regexp_egress, record.rule)[4] != "" ? format("-%s",regex(local.regexp_egress, record.rule)[4]) : ""  # dst_max
             )
             src      = null
             dst = regex(local.regexp_egress, record.rule)[6]
@@ -130,12 +116,12 @@ locals {
             _regexp     = local.regexp_ingress
 
             # try egress generic
-            protocol    = format("%s/%s-%s:%s-%s",
+            protocol    = format("%s/%s%s:%s%s",
                 regex(local.regexp_ingress, record.rule)[2], # protocol
                 regex(local.regexp_ingress, record.rule)[3], # src_min
-                regex(local.regexp_ingress, record.rule)[4], # src_max
+                regex(local.regexp_ingress, record.rule)[4] != "" ? format("-%s",regex(local.regexp_ingress, record.rule)[4]) : "", # src_max
                 regex(local.regexp_ingress, record.rule)[5], # dst_min
-                regex(local.regexp_ingress, record.rule)[6]  # dst_max
+                regex(local.regexp_ingress, record.rule)[6] != "" ? format("-%s",regex(local.regexp_ingress, record.rule)[6]) : ""  # dst_max
             )
             src = regex(local.regexp_ingress, record.rule)[0]
             dst = null
@@ -161,10 +147,10 @@ locals {
             _src        = record.rule
             _regexp     = local.regexp_egress_dst
 
-            protocol    = format("%s/%s-%s",
+            protocol    = format("%s/%s%s",
                 regex(local.regexp_egress_dst, record.rule)[0], # protocol
                 regex(local.regexp_egress_dst, record.rule)[1], # dst_min
-                regex(local.regexp_egress_dst, record.rule)[2]  # dst_max
+                regex(local.regexp_egress_dst, record.rule)[2] != "" ? format("-%s",regex(local.regexp_egress_dst, record.rule)[2]) : ""  # dst_max
             )
             src      = null
             dst = regex(local.regexp_egress_dst, record.rule)[4]
@@ -355,9 +341,9 @@ locals {
       sort(formatlist("%010d", [for rule in value : rule._position]))
   }
 }
-output "sl_lex_positions_per_key" {
-  value = local.sl_lex_positions_per_key
-}
+// output "sl_lex_positions_per_key" {
+//   value = local.sl_lex_positions_per_key
+// }
 
 locals {
   sl_lex = {
@@ -393,8 +379,8 @@ locals {
     } 
   }
 }
-// output "result_sl_lex" {
-//   value = local.sl_lex
-// }
+output "result_sl_lex" {
+  value = local.sl_lex
+}
 
 

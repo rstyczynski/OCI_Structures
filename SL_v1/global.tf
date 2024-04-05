@@ -10,3 +10,19 @@ locals {
   regexp_comment_option = "(?:\\/\\*\\s*)?(?:([\\w !]*))(?:\\*\\/)?"
   regexp_eol = "$"
 }
+
+# critical error indicator record
+# will be chosen when interim processing does not include some of input records.
+locals {
+  sl_critical_error = {
+    "error" = {
+            _position   = -1
+            _format = "error"
+            description = "Critical processing error. Record does not processed by any routine."
+            protocol = null
+            src      = null
+            dst = null
+            stateless = null
+        } 
+    } 
+} 

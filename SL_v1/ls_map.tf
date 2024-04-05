@@ -20,7 +20,7 @@ variable "sl_map" {
       "demo1" = {
       rules = [
         {
-          protocol    = "tcp/22",
+          protocol    = "tXcp/22",
           dst = "internet",
           description = "ssh for all!"
         },
@@ -61,7 +61,7 @@ variable "sl_map" {
 # select data source to enable sl_lex format
 variable data_format {
   type = string
-  default = "sl_lex" // sl_lex to use lex format
+  default = "sl_lex" // sl_lex to use lex format; ls_map otherwise.
 }
 
 # select key for output ingress and egress lists
@@ -386,9 +386,4 @@ locals {
 }
 output "sl" {
   value = local.sl
-}
-
-
-provider "null" {
-  version = "~> 3.0"
 }

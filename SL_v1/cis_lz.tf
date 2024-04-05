@@ -2,7 +2,6 @@
 # Interface to CIZ Network module
 #
 
-
 locals {
   sl_ingress = {
     for key, entry in local.sl_processed :
@@ -77,11 +76,11 @@ locals {
 // }
 
 // get rules for egress
-// output "sl_egress_key" {
-//   value = local.sl_egress[var.sl_key].rules
-// }
+output "sl_egress_key" {
+  value = local.sl_egress[var.sl_key].rules
+}
 
 // get rules for ingress
-// output "sl_ingress_key" {
-//   value = local.sl_ingress[var.sl_key].rules
-// }
+output "sl_ingress_key" {
+  value = local.sl_ingress[var.sl_key].rules
+}
