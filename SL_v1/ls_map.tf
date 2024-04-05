@@ -58,28 +58,39 @@ variable "sl_map" {
     }
 }
 
-#
-# Switch data source to enable sl_lex format
-#
-locals {
-  sl_map = var.sl_map
-  //sl_map = local.sl_lex
+# select data source to enable sl_lex format
+variable data_format {
+  type = string
+  default = "sl_map"
+}
+
+# select key for output ingress and egress lists
+variable sl_key {
+  type = string
+  default = "demo1"
 }
 
 #
 # known networks map. Register here CIDR labels
 #
-locals {
-    cidrs = {
+variable cidrs {
+    type = map(string)
+    default = {
         "internet" = "0.0.0.0/0",
         "on_premises" = "192.0.0.0/8",
         "all_services" = "all_services"
     }
 }
 
-variable sl_key {
-  type = string
-  default = "demo1"
+###
+### Processing
+###
+
+#
+# switch data source to enable sl_lex format
+#
+locals {
+  sl_map = var.data_format == "sl_map" ? var.sl_map : local.sl_lex
 }
 
 #
@@ -93,8 +104,8 @@ locals {
         for ndx, rule in value.rules :
         {
           protocol    = can(rule.protocol) ? rule.protocol : null
-          src         = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? rule.src : can(local.cidrs[rule.src]) ? local.cidrs[rule.src] : "label not in local.cidrs"
-          dst         = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? rule.dst : can(local.cidrs[rule.dst]) ? local.cidrs[rule.dst] : "label not in local.cidrs"
+          src         = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? rule.src : can(var.cidrs[rule.src]) ? var.cidrs[rule.src] : "label not in var.cidrs"
+          dst         = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? rule.dst : can(var.cidrs[rule.dst]) ? var.cidrs[rule.dst] : "label not in var.cidrs"
           description = can(rule.description) ? rule.description : null
           stateless   = can(rule.stateless) ? rule.stateless : null
         }
