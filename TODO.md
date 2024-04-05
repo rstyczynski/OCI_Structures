@@ -1,7 +1,7 @@
 # TODO
-2. Update test.sh for error cases
-3. CIDR may be rendered from label
-4. Update comment's regex for ','
+2. Extend test.sh with error cases
+5. Change lex scheme to >> cidr, cidr >>
+7. 
 
 100. add support for IPv6 at regexp_cidr / destination_type
 110. make security_list input compatible with oci_core_security_list/egress_security_rules and oci_core_security_list/ingress_security_rules
@@ -55,6 +55,10 @@ tcp/1521-1523 >> 10.20.30.40/10 /* ssh for almost all! */
 4. 10.20.30.40/10
 5. ssh for almost all! 
 
+## 5. Change lex scheme to >> cidr, cidr >>
+
+>> on_premises TcP/21-22:1521-1523 /* on-prem DB for all! */"
+on_premises >> TcP/21-22:1521-1523 /* Cloud DB for on-prem apps */"
 
 
 

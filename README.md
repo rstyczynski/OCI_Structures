@@ -69,6 +69,40 @@ with expected answer:
 
 # Change list
 
+## 6. Extend test.sh with lex use case
+
+## 4. Update comment's regex for ','
+
+## 3. CIDR may be rendered from label
+
+Access list may use labels in place of CIDRs. Labels are converted to proper value using var.cidrs map. 
+
+```
+#
+# known networks map. Register here CIDR labels
+#
+variable cidrs {
+    type = map(string)
+    default = {
+        "internet" = "0.0.0.0/0",
+        "on_premises" = "192.0.0.0/8",
+        "all_services" = "all_services"
+    }
+}
+```
+
+If needed network map may be provided by a local variable, what overwrites variable.
+
+```
+locals  {
+    cidrs = {
+        "internet" = "0.0.0.0/0",
+        "on_premises" = "10.0.0.0/8",
+        "all_services" = "all_services"
+    }
+}   
+```
+
 ## 1. Implement error handling
 
 Processing errors are reported in sl_error output. source_string contains original protocol data. Error is everything what is not:

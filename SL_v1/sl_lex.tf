@@ -14,7 +14,7 @@ variable "sl_lex" {
         "0.0.0.0/0      >> uDP/222-223",
       ],
       "demo2" = [
-        "icmp/3.4       >> 0.0.0.0/0 /* egress icmp type 3 code 4 */",
+        "icmp/3.4       >> 0.0.0.0/0 /* egress icmp type 3, code 4 */",
         "0.0.0.0/0      >> icmp/8", 
         "0.0.0.0/0      >> icmp/1. /* icmp type 1 */",
         "icmp/3.        > 0.0.0.0/0",
@@ -81,7 +81,7 @@ locals {
             _position   = record._position
             _format     = "regexp_egress"
             _src        = record.rule
-            _regexp     = local.regexp_egress
+            //_regexp     = local.regexp_egress
 
             # try egress generic
             protocol    = format("%s/%s%s:%s%s",
@@ -113,7 +113,7 @@ locals {
             _position   = record._position
             _format     = "regexp_ingress"
             _src        = record.rule
-            _regexp     = local.regexp_ingress
+            //_regexp     = local.regexp_ingress
 
             # try egress generic
             protocol    = format("%s/%s%s:%s%s",
@@ -145,7 +145,7 @@ locals {
             _position   = record._position
             _format     = "regexp_egress_dst"
             _src        = record.rule
-            _regexp     = local.regexp_egress_dst
+            //_regexp     = local.regexp_egress_dst
 
             protocol    = format("%s/%s%s",
                 regex(local.regexp_egress_dst, record.rule)[0], # protocol
@@ -174,7 +174,7 @@ locals {
             _position   = record._position
             _format     = "regexp_ingress_dst"
             _src        = record.rule
-            _regexp     = local.regexp_ingress_dst
+            //_regexp     = local.regexp_ingress_dst
 
             protocol    = format("%s/%s-%s",
                 regex(local.regexp_ingress_dst, record.rule)[2], # protocol
@@ -203,7 +203,7 @@ locals {
             _position   = record._position
             _format     = "regexp_ingress_dst"
             _src        = record.rule
-            _regexp     = local.regexp_ingress_dst_cmt
+            //_regexp     = local.regexp_ingress_dst_cmt
 
             protocol    = format("%s/%s-%s",
                 regex(local.regexp_ingress_dst_cmt, record.rule)[2], # protocol
@@ -232,7 +232,7 @@ locals {
             _position   = record._position
             _format     = "regexp_icmp_ingress_cmt"
             _src        = record.rule
-            _regexp     = local.regexp_icmp_ingress_cmt
+            //_regexp     = local.regexp_icmp_ingress_cmt
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_icmp_ingress_cmt, record.rule)[2], # type
@@ -259,7 +259,7 @@ locals {
             _position   = record._position
             _format     = "regexp_icmp_ingress"
             _src        = record.rule
-            _regexp     = local.regexp_icmp_ingress
+            //_regexp     = local.regexp_icmp_ingress
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_icmp_ingress, record.rule)[2], # type
@@ -287,7 +287,7 @@ locals {
             _position   = record._position
             _format     = "regexp_icmp_egress_cmt"
             _src        = record.rule
-            _regexp     = local.regexp_icmp_egress_cmt
+            //_regexp     = local.regexp_icmp_egress_cmt
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_icmp_egress_cmt, record.rule)[0], # type
@@ -315,7 +315,7 @@ locals {
             _position   = record._position
             _format     = "regexp_icmp_egress"
             _src        = record.rule
-            _regexp     = local.regexp_icmp_egress
+            //_regexp     = local.regexp_icmp_egress
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_icmp_egress, record.rule)[0], # type
@@ -379,7 +379,7 @@ locals {
     } 
   }
 }
-output "result_sl_lex" {
+output "sl_lex" {
   value = local.sl_lex
 }
 

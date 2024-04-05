@@ -20,7 +20,7 @@ variable "sl_map" {
       "demo1" = {
       rules = [
         {
-          protocol    = "tXcp/22",
+          protocol    = "tcp/22",
           dst = "internet",
           description = "ssh for all!"
         },
@@ -104,8 +104,8 @@ locals {
         for ndx, rule in value.rules :
         {
           protocol    = can(rule.protocol) ? rule.protocol : null
-          src         = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? rule.src : can(var.cidrs[rule.src]) ? var.cidrs[rule.src] : "label not in var.cidrs"
-          dst         = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? rule.dst : can(var.cidrs[rule.dst]) ? var.cidrs[rule.dst] : "label not in var.cidrs"
+          src         = rule.src == null ? null : can(regex(local.regexp_cidr, rule.src)) ? rule.src : can(local.cidrs[rule.src]) ? local.cidrs[rule.src] : can(var.cidrs[rule.src]) ? var.cidrs[rule.src] : "label not in var.cidrs"
+          dst         = rule.dst == null ? null : can(regex(local.regexp_cidr, rule.dst)) ? rule.dst : can(local.cidrs[rule.dst]) ? local.cidrs[rule.dst] : can(var.cidrs[rule.dst]) ? var.cidrs[rule.dst] : "label not in var.cidrs"
           description = can(rule.description) ? rule.description : null
           stateless   = can(rule.stateless) ? rule.stateless : null
         }
@@ -274,7 +274,9 @@ locals {
 //   value = local.sl_icmp
 // }
 
-# process error
+#
+# mark unrecognized records as errors
+#
 locals {
   sl_error = {
     for key, value in local.sl_indexed : 
@@ -325,7 +327,7 @@ locals {
 //   value = local.positions_per_key
 // }
 
-# combine both partially processed list to the result list
+# combine all partially processed lists to the final one
 # keep original order
 locals {
   sl_processed = {
@@ -350,6 +352,10 @@ locals {
 //   value = local.sl_processed
 // }
 
+
+#
+# keep result in data structure of CIS Network module
+#
 locals {
   sl = {
     for key, entry in local.sl_processed :
