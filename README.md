@@ -2,10 +2,10 @@
 OCI terraform provider requires to use quite strange way of configuring security lists. Data structure is not intuitive, and requires a lot of writing to define access list. Landing Zone libraries try to eliminate this hassle, still keeping a lot of API overhead. One of examples are min, and max fields for tcp/udp port definition. Not bad for some of use cases, but not nice for majority of them.
 
 This library proposes two formats:
-1. One line per access rule
+1. One line per ingress access rule
 
 ```
-    accept tcp/1521-1523 from 0.0.0.0/0 /* DB access for everybody! */
+    accept tcp/1521-1523 from 0.0.0.0/0 stateless /* Database access for everybody! */
 ```
 
 2. Optimized protocol and port numbers
@@ -15,14 +15,37 @@ This library proposes two formats:
     protocol    = "tcp/1521-1523"
     source      = "0.0.0.0/0"
     destination = null
-    stateless   = false
+    stateless   = true
 ```
 
-Both statements mean the same thing. I hope the former is just more fun to write.
+, and the same for egress:
+1. One line per access rule
 
-You can use the latter one if you prefer, and the one-liner is always converted to the more descriptive one, which is converted to CIZ Enhanced Networking module format. 
+```
+    permit tcp/1521-1523 to 0.0.0.0/0 stateless /* All databases for you! */
+```
 
-The access list is kept in a map of objects with key representing set of access rules i.e. security list. The library produces data structure compatible with CIS Landing Zone Network Module with access code:
+2. Optimized protocol and port numbers
+
+```
+    description = "All databases for you!"
+    protocol    = "tcp/1521-1523"
+    source      = null
+    destination = "0.0.0.0/0"
+    stateless   = true
+```
+
+Both formats mean the same thing. In fact one-liner is always converted to the field based format, which is converted to target data structure.
+
+Following model shows mapping between access statement and OCI terraform provider data format.
+
+![Ingress access statement mapping](models/ingress_mapping.jpg "Ingress access statement mapping")
+
+## Terraform provider interface
+TODO
+
+## CIS LZ interface
+The library produces data structure compatible with CIS Landing Zone Network Module with access code:
 
 1. ingress
 
