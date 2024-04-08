@@ -27,3 +27,12 @@ locals {
         } 
     } 
 }
+
+# terraform provider protocol codes
+locals {
+  protocol2code = {
+    "TCP" = 6
+    "UDP" = 17
+    "ICMP" = 1
+  }
+}

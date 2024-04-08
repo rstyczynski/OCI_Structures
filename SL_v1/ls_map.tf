@@ -76,11 +76,18 @@ variable sl_key {
 variable cidrs {
     type = map(string)
     default = {
-        "internet" = "0.0.0.0/0",
-        "on_premises" = "192.0.0.0/8",
-        "all_services" = "all_services"
+        "on_premises" = "192.0.0.0/8"
     }
 }
+
+locals {
+    global_cidrs = {
+        "internet" = "0.0.0.0/0",
+        "all_services" = "all_services"
+    }
+
+    cidrs = merge(var.cidrs, local.global_cidrs)
+}   
 
 ###
 ### Processing

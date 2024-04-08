@@ -37,9 +37,18 @@ This library proposes two formats:
 
 Both formats mean the same thing. In fact one-liner is always converted to the field based format, which is converted to target data structure.
 
-Following model shows mapping between access statement and OCI terraform provider data format.
+Note that only difference between egress and ingress is place of CIDR at destination or source, and pair of words permit to/accept from. 
 
-![Ingress access statement mapping](models/ingress_mapping.jpg "Ingress access statement mapping")
+## CIDR labels
+
+
+## Mapping
+Following models show mapping between egress and ingress access statements and OCI terraform provider data format.
+
+![Egress access statement mapping](models/egress_mapping.jpg "Egress access statement mapping")Egress access statement mapping
+
+![Ingress access statement mapping](models/ingress_mapping.jpg "Ingress access statement mapping")Ingress access statement mapping
+
 
 ## Terraform provider interface
 TODO
