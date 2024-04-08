@@ -82,7 +82,7 @@ variable cidrs {
 
 locals {
     global_cidrs = {
-        "internet" = "0.0.0.0/0",
+        "all" = "0.0.0.0/0",
         "all_services" = "all_services"
     }
 

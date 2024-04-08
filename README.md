@@ -40,7 +40,16 @@ Both formats mean the same thing. In fact one-liner is always converted to the f
 Note that only difference between egress and ingress is place of CIDR at destination or source, and pair of words permit to/accept from. 
 
 ## CIDR labels
+CIDR may be represented by a label. Library comes with two default labels:
+1. internet - 0.0.0.0/0
+2. all_services -  service gatewy's all_services 
 
+Label is substituted by one CIDR.
+
+```
+    accept tcp/1521-1523 from all stateless /* Database access for everybody! */
+    permit tcp/1521-1523 to all stateless /* All databases for you! */
+```
 
 ## Mapping
 Following models show mapping between egress and ingress access statements and OCI terraform provider data format.
