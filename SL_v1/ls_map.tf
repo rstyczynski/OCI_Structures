@@ -65,7 +65,7 @@ variable data_format {
 }
 
 # select key for output ingress and egress lists
-variable sl_key {
+variable sl_cislz_key {
   type = string
   default = "demo1"
 }
@@ -364,7 +364,7 @@ locals {
 # keep result in data structure of CIS Network module
 #
 locals {
-  sl = {
+  sl_cislz = {
     for key, entry in local.sl_processed :
       key => {
       rules = [
@@ -397,6 +397,6 @@ locals {
     } 
   }
 }
-output "sl" {
-  value = local.sl
+output "sl_cislz" {
+  value = local.sl_cislz
 }

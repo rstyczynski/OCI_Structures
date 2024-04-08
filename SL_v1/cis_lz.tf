@@ -3,7 +3,7 @@
 #
 
 locals {
-  sl_ingress = {
+  sl_cislz_ingress = {
     for key, entry in local.sl_processed :
       key => {
       rules = [
@@ -36,12 +36,12 @@ locals {
     } 
   }
 }
-// output "sl_ingress" {
-//   value = local.sl_ingress
+// output "sl_cislz_ingress" {
+//   value = local.sl_cislz_ingress
 // }
 
 locals {
-  sl_egress = {
+  sl_cislz_egress = {
     for key, entry in local.sl_processed :
       key => {
       rules = [
@@ -71,16 +71,16 @@ locals {
     } 
   }
 }
-// output "sl_egress" {
-//   value = local.sl_egress
+// output "sl_cislz_egress" {
+//   value = local.sl_cislz_egress
 // }
 
 // get rules for egress
-output "sl_egress_key" {
-  value = local.sl_egress[var.sl_key].rules
+output "sl_cislz_egress_key" {
+  value = local.sl_cislz_egress[var.sl_cislz_key].rules
 }
 
 // get rules for ingress
-output "sl_ingress_key" {
-  value = local.sl_ingress[var.sl_key].rules
+output "sl_cislz_ingress_key" {
+  value = local.sl_cislz_ingress[var.sl_cislz_key].rules
 }

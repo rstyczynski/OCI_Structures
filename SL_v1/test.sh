@@ -13,7 +13,7 @@ export TF_VAR_sl_lang='
 {
       "test1" = [
         "permit TcP/21-22:1521-1523 to on_premises /* DB for some of you */",
-        "accept uDP/20000-30000:80-90 from internet /* HTTP over UDP for some of you */",
+        "accept uDP/20000-30000:80-90 from all /* HTTP over UDP for some of you */",
         "permit tcp/:1521-1523 to 0.0.0.0/0 stateless",
         "accept uDP/22-23 from 0.0.0.0/0 /* strange ingress udp */",
         "permit tcp/22 to 0.0.0.0/0 /* ssh for all! */",
@@ -33,7 +33,7 @@ export TF_VAR_sl_lang='
 '
 expect_mode=json
 output_name=sl_lang_map
-export TF_VAR_sl_key=test1
+export TF_VAR_sl_cislz_key=test1
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl_lang ''; show_received_json
@@ -54,11 +54,11 @@ expect_tf_answer sl_lang '
       {
         "_format": "regexp_lang_ingress",
         "_position": "1",
-        "_src": "accept uDP/20000-30000:80-90 from internet /* HTTP over UDP for some of you */",
+        "_src": "accept uDP/20000-30000:80-90 from all /* HTTP over UDP for some of you */",
         "description": "HTTP over UDP for some of you ",
         "dst": null,
         "protocol": "uDP/20000-30000:80-90",
-        "src": "internet",
+        "src": "all",
         "stateless": "false"
       },
       {
@@ -191,12 +191,12 @@ expect_tf_answer sl_lang '
 '
 
 expect_mode=json
-output_name=sl
-export TF_VAR_sl_key=test1
+output_name=sl_cislz
+export TF_VAR_sl_cislz_key=test1
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl_lex ''; show_received_json
-expect_tf_answer sl '
+expect_tf_answer sl_cislz '
 {
   "test1": {
     "rules": [
@@ -471,7 +471,7 @@ export TF_VAR_sl_lex='
  {
   "test1" = [
     "TcP/21-22:1521-1523 >> on_premises /* DB for some of you */",
-    "internet      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
+    "all      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
     "tcp/:1521-1523 > 0.0.0.0/0",
     "0.0.0.0/0      >> uDP/22-23 /* strange ingress udp */",
     "tcp/22         >> 0.0.0.0/0 /* ssh for all! */",
@@ -491,7 +491,7 @@ export TF_VAR_sl_lex='
 '
 expect_mode=json
 output_name=sl_lex_map
-export TF_VAR_sl_key=test1
+export TF_VAR_sl_cislz_key=test1
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl_lex ''; show_received_json
@@ -512,11 +512,11 @@ expect_tf_answer sl_lex '
       {
         "_format": "regexp_ingress",
         "_position": "1",
-        "_src": "internet      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
+        "_src": "all      >> uDP/20000-30000:80-90 /* HTTP over UDP for some of you */",
         "description": "HTTP over UDP for some of you ",
         "dst": null,
         "protocol": "uDP/20000-30000:80-90",
-        "src": "internet",
+        "src": "all",
         "stateless": "false"
       },
       {
@@ -649,12 +649,12 @@ expect_tf_answer sl_lex '
 '
 
 expect_mode=json
-output_name=sl
-export TF_VAR_sl_key=test1
+output_name=sl_cislz
+export TF_VAR_sl_cislz_key=test1
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl_lex ''; show_received_json
-expect_tf_answer sl '
+expect_tf_answer sl_cislz '
 {
   "test1": {
     "rules": [
@@ -945,8 +945,8 @@ export TF_VAR_sl_map='
   }
 '
 expect_mode=json
-output_name=sl
-export TF_VAR_sl_key=test1
+output_name=sl_cislz
+export TF_VAR_sl_cislz_key=test1
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl_simple ''; show_received_json
@@ -1056,8 +1056,8 @@ export TF_VAR_sl_map='
 '
 
 expect_mode=json
-output_name=sl
-export TF_VAR_sl_key=test1
+output_name=sl_cislz
+export TF_VAR_sl_cislz_key=test1
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl ''; show_received_json
@@ -1271,8 +1271,8 @@ expect_tf_answer sl '{
 }
 '
 
-export TF_VAR_sl_key=test1
-output_name=sl_egress_key
+export TF_VAR_sl_cislz_key=test1
+output_name=sl_cislz_egress_key
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl_egress ''; show_received_json
@@ -1409,9 +1409,9 @@ expect_tf_answer sl_egress '
 ]
 '
 
-export TF_VAR_sl_key=test2
+export TF_VAR_sl_cislz_key=test2
 expect_mode=json
-output_name=sl_ingress_key
+output_name=sl_cislz_ingress_key
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl_ingress ''; show_received_json
@@ -1460,7 +1460,7 @@ expect_tf_answer sl_ingress '
 unset TF_VAR_sl_lex
 unset TF_VAR_sl_lang
 unset TF_VAR_sl_map
-unset TF_VAR_sl_key
+unset TF_VAR_sl_cislz_key
 unset TF_VAR_data_format
 unset output_name
 unset expect_mode
