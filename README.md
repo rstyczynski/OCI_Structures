@@ -41,8 +41,8 @@ Note that only difference between egress and ingress is place of CIDR at destina
 
 ## CIDR labels
 CIDR may be represented by a label. Library comes with two default labels:
-1. internet - 0.0.0.0/0
-2. all_services -  service gatewy's all_services 
+1. all - 0.0.0.0/0
+2. all_services -  service gateway's all_services 
 
 Label is substituted by one CIDR.
 
