@@ -1061,7 +1061,7 @@ export TF_VAR_sl_cislz_key=test1
 # parameter is expected json
 # take it executing:
 # expect_tf_answer sl ''; show_received_json
-expect_tf_answer sl '{
+expect_tf_answer sl_cislz '{
   "test1": {
     "rules": [
       {
