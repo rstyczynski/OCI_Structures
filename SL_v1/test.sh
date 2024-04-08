@@ -1290,8 +1290,10 @@ expect_tf_answer sl_egress '
     "icmp_code": null,
     "icmp_type": null,
     "protocol": "TCP",
+    "src": null,
     "src_port_max": null,
     "src_port_min": null,
+    "src_type": null,
     "stateless": "true"
   },
   {
@@ -1306,8 +1308,10 @@ expect_tf_answer sl_egress '
     "icmp_code": null,
     "icmp_type": null,
     "protocol": "TCP",
+    "src": null,
     "src_port_max": null,
     "src_port_min": null,
+    "src_type": null,
     "stateless": null
   },
   {
@@ -1322,8 +1326,10 @@ expect_tf_answer sl_egress '
     "icmp_code": null,
     "icmp_type": null,
     "protocol": "TCP",
+    "src": null,
     "src_port_max": null,
     "src_port_min": null,
+    "src_type": null,
     "stateless": null
   },
   {
@@ -1338,8 +1344,10 @@ expect_tf_answer sl_egress '
     "icmp_code": null,
     "icmp_type": null,
     "protocol": "TCP",
+    "src": null,
     "src_port_max": null,
     "src_port_min": null,
+    "src_type": null,
     "stateless": null
   },
   {
@@ -1354,8 +1362,10 @@ expect_tf_answer sl_egress '
     "icmp_code": null,
     "icmp_type": null,
     "protocol": "TCP",
+    "src": null,
     "src_port_max": 22,
     "src_port_min": 22,
+    "src_type": null,
     "stateless": null
   },
   {
@@ -1370,8 +1380,10 @@ expect_tf_answer sl_egress '
     "icmp_code": null,
     "icmp_type": null,
     "protocol": "TCP",
+    "src": null,
     "src_port_max": 22,
     "src_port_min": 21,
+    "src_type": null,
     "stateless": null
   },
   {
@@ -1386,8 +1398,10 @@ expect_tf_answer sl_egress '
     "icmp_code": 4,
     "icmp_type": 3,
     "protocol": "ICMP",
+    "src": null,
     "src_port_max": null,
     "src_port_min": null,
+    "src_type": null,
     "stateless": null
   },
   {
@@ -1402,8 +1416,10 @@ expect_tf_answer sl_egress '
     "icmp_code": null,
     "icmp_type": 8,
     "protocol": "ICMP",
+    "src": null,
     "src_port_max": null,
     "src_port_min": null,
+    "src_type": null,
     "stateless": null
   }
 ]
@@ -1455,7 +1471,6 @@ expect_tf_answer sl_ingress '
   }
 ]
 '
-
 
 unset TF_VAR_sl_lex
 unset TF_VAR_sl_lang
