@@ -21,7 +21,7 @@ variable "sl_map" {
       rules = [
         {
           protocol    = "tcp/22",
-          dst = "internet",
+          dst = "all",
           description = "ssh for all!"
         },
         {
@@ -65,7 +65,7 @@ variable data_format {
 }
 
 # select key for output ingress and egress lists
-variable sl_cislz_key {
+variable sl_key {
   type = string
   default = "demo1"
 }
@@ -358,6 +358,5 @@ locals {
 // output "sl_processed" {
 //   value = local.sl_processed
 // }
-
 
 

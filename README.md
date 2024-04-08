@@ -5,7 +5,7 @@ This library proposes two formats:
 1. One line per ingress access rule
 
 ```
-    accept tcp/1521-1523 from 0.0.0.0/0 stateless /* Database access for everybody! */
+    accept tcp/1521-1523 stateless from 0.0.0.0/0 /* Database access for everybody! */
 ```
 
 2. Optimized protocol and port numbers
@@ -22,7 +22,7 @@ This library proposes two formats:
 1. One line per access rule
 
 ```
-    permit tcp/1521-1523 to 0.0.0.0/0 stateless /* All databases for you! */
+    permit tcp/1521-1523 stateless to 0.0.0.0/0 /* All databases for you! */
 ```
 
 2. Optimized protocol and port numbers
@@ -47,8 +47,8 @@ CIDR may be represented by a label. Library comes with two default labels:
 Label is substituted by one CIDR.
 
 ```
-    accept tcp/1521-1523 from all stateless /* Database access for everybody! */
-    permit tcp/1521-1523 to all stateless /* All databases for you! */
+    accept tcp/1521-1523 stateless from all /* Database access for everybody! */
+    permit tcp/1521-1523 stateless to all /* All databases for you! */
 ```
 
 ## Mapping
@@ -60,7 +60,19 @@ Following models show mapping between egress and ingress access statements and O
 
 
 ## Terraform provider interface
-TODO
+The library produces data structure compatible with terraform provider. Get is with following code:
+
+1. ingress
+
+```
+    local.sl_tf_ingress["SL_NAME"].rules
+```
+
+2. egress
+
+```
+    local.sl_tf_egress["SL_NAME"].rules
+```
 
 ## CIS LZ interface
 The library produces data structure compatible with CIS Landing Zone Network Module with access code:
@@ -68,13 +80,13 @@ The library produces data structure compatible with CIS Landing Zone Network Mod
 1. ingress
 
 ```
-    local.sl_ingress["SL_NAME"].rules
+    local.sl_cislz_ingress["SL_NAME"].rules
 ```
 
 2. egress
 
 ```
-    local.sl_egress["SL_NAME"].rules
+    local.sl_cislz_egress["SL_NAME"].rules
 ```
 
 ## Unit test

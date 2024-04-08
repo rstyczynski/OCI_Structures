@@ -4,12 +4,12 @@ variable "sl_lang" {
   default = {
       "demo1" = [
         "permit TcP/21-22:1521-1523 to on_premises /* DB for some of you */",
-        "accept uDP/20000-30000:80-90 from internet /* HTTP over UDP for some of you */",
-        "permit tcp/:1521-1523 to 0.0.0.0/0 stateless",
+        "accept uDP/20000-30000:80-90 from all /* HTTP over UDP for some of you */",
+        "permit tcp/:1521-1523 stateless to 0.0.0.0/0",
         "accept uDP/22-23 from 0.0.0.0/0 /* strange ingress udp */",
         "permit tcp/22 to 0.0.0.0/0 /* ssh for all! */",
-        "accept TcP/21-22:1521-1523 from 0.0.0.0/0 stateless/* DB for everyone */" ,
-        "permit tcp/80-90 to 0.0.0.0/0 stateless /* stateless extended http */",
+        "accept TcP/21-22:1521-1523 stateless from 0.0.0.0/0 /* DB for everyone */" ,
+        "permit tcp/80-90 stateless to 0.0.0.0/0 /* stateless extended http */",
         "permit tcp/22 to 0.0.0.0/0 /* ssh for all! */",
         "accept uDP/222-223 from 0.0.0.0/0",
       ],
@@ -17,7 +17,7 @@ variable "sl_lang" {
         "permit icmp/3.4 to 0.0.0.0/0 /* egress icmp type 3, code 4 */",
         "accept icmp/8 from 0.0.0.0/0", 
         "accept icmp/1. from 0.0.0.0/0 /* icmp type 1 */",
-        "permit icmp/3. to 0.0.0.0/0 stateless",
+        "permit icmp/3. stateless to 0.0.0.0/0",
         "accept icmp/8.1 from 0.0.0.0/0"        
         ]
       }
@@ -28,27 +28,36 @@ variable "sl_lang" {
 
 #  pattern to decode lexical rule
 locals {
-    regexp_lang_egress = format("^permit\\s*%s\\s*to\\s*%s\\s*%s\\s*%s",local.regexp_ip_ports_full, local.regexp_label, local.regexp_stateless,local.regexp_comment_option)
-    regexp_lang_ingress = format("^accept\\s+%s\\s+from\\s+%s\\s*%s\\s*%s",local.regexp_ip_ports_full, local.regexp_label, local.regexp_stateless, local.regexp_comment_option)
+    regexp_lang_egress = "^permit\\s+${local.regexp_ip_ports_full}\\s*${local.regexp_stateless}\\s+to\\s+${local.regexp_label}\\s*${local.regexp_comment_option}"
+    regexp_lang_ingress = "^accept\\s+${local.regexp_ip_ports_full}\\s*${local.regexp_stateless}\\s+from\\s+${local.regexp_label}\\s*${local.regexp_comment_option}"
 }
+
+
 
 # patterns for special case of dst only
 locals {
-    regexp_lang_egress_dst = format("^permit\\s+%s\\s+to\\s+%s\\s*%s\\s*%s",local.regexp_ip_ports_dst, local.regexp_label, local.regexp_stateless,local.regexp_comment_option)
+    regexp_lang_egress_dst = "^permit\\s+${local.regexp_ip_ports_dst}\\s*${local.regexp_stateless}\\s+to\\s+${local.regexp_label}\\s*${local.regexp_comment_option}"
     // regexp_lang_ingress_dst_cmt takes full syntax with comments
     // regexp_lang_ingress_dst is ended by $
     // both are workaround for lack of knowledge how to forbid ':' character after ports.
     // w/o above ingress_dst regexp matches generic regexp_lang_ingress
-    regexp_lang_ingress_dst_cmt =  format("^accept\\s+%s\\s+from\\s+%s\\s*%s\\s*%s",local.regexp_ip_ports_dst, local.regexp_label, local.regexp_stateless, local.regexp_comment)
-    regexp_lang_ingress_dst = format("^accept\\s+%s\\s+from\\s+%s\\s*%s\\s*%s",local.regexp_ip_ports_dst, local.regexp_label, local.regexp_stateless, local.regexp_eol)
+    regexp_lang_ingress_dst_cmt =  "^accept\\s+${local.regexp_ip_ports_dst}\\s*${local.regexp_stateless}\\s+from\\s+${local.regexp_label}\\s+${local.regexp_comment}"
+    regexp_lang_ingress_dst = "^accept\\s+${local.regexp_ip_ports_dst}\\s*${local.regexp_stateless}\\s+from\\s+${local.regexp_label}\\s*${local.regexp_eol}"
+}
+output regexp_lang_egress_dst {
+  value = local.regexp_lang_egress_dst
 }
 
 # patterns for icmp
 locals {
-    regexp_lang_icmp_egress = format("^permit\\s+%s\\s+to\\s+%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_label, local.regexp_stateless, local.regexp_eol)
-    regexp_lang_icmp_egress_cmt = format("^permit\\s+%s\\s+to\\s+%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_label, local.regexp_stateless, local.regexp_comment)
-    regexp_lang_icmp_ingress = format("^accept\\s+%s\\s+from\\s+%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_label, local.regexp_stateless, local.regexp_eol)
-    regexp_lang_icmp_ingress_cmt = format("^accept\\s+%s\\s+from\\s+%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_label, local.regexp_stateless, local.regexp_comment)
+    regexp_lang_icmp_egress = "^permit\\s+${local.regexp_icmp_tc}\\s*${local.regexp_stateless}\\s+to\\s+${local.regexp_label}\\s*${local.regexp_eol}"
+    #"^permit\\s+%s\\s+to%s\\s+\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_label, local.regexp_stateless, local.regexp_eol)
+    regexp_lang_icmp_egress_cmt = "^permit\\s+${local.regexp_icmp_tc}\\s*${local.regexp_stateless}\\s+to\\s+${local.regexp_label}\\s+${local.regexp_comment}"
+    #format("^permit\\s+%s\\s+to%s\\s+\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_label, local.regexp_stateless, local.regexp_comment)
+    regexp_lang_icmp_ingress = "^accept\\s+${local.regexp_icmp_tc}\\s*${local.regexp_stateless}\\s+from\\s+${local.regexp_label}\\s*${local.regexp_eol}"
+    #format("^accept\\s+%s\\s+from\\s+%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_label, local.regexp_stateless, local.regexp_eol)
+    regexp_lang_icmp_ingress_cmt =  "^accept\\s+${local.regexp_icmp_tc}\\s*${local.regexp_stateless}\\s+from\\s+${local.regexp_label}\\s+${local.regexp_comment}"
+    #format("^accept\\s+%s\\s+from\\s+%s\\s*%s\\s*%s",local.regexp_icmp_tc, local.regexp_label, local.regexp_stateless, local.regexp_comment)
 }
 
 # add index variable to keep order of records
@@ -90,9 +99,9 @@ locals {
                 regex(local.regexp_lang_egress, record.rule)[3], # dst_min
                 regex(local.regexp_lang_egress, record.rule)[4] != "" ? format("-%s",regex(local.regexp_lang_egress, record.rule)[4]) : ""  # dst_max
             )
+            stateless   = regex(local.regexp_lang_egress, record.rule)[5] == "stateless" ? true : false
             src      = null
-            dst = regex(local.regexp_lang_egress, record.rule)[5]
-            stateless   = regex(local.regexp_lang_egress, record.rule)[6] == "stateless" ? true : false
+            dst = regex(local.regexp_lang_egress, record.rule)[6]
             description = can(regex(local.regexp_lang_egress, record.rule)[7]) ? regex(local.regexp_lang_egress, record.rule)[7] : null
         } if can(regex(local.regexp_lang_egress, record.rule))
     } 
@@ -122,9 +131,9 @@ locals {
                 regex(local.regexp_lang_ingress, record.rule)[3], # dst_min
                 regex(local.regexp_lang_ingress, record.rule)[4] != "" ? format("-%s",regex(local.regexp_lang_ingress, record.rule)[4]) : ""  # dst_max
             )
-            src = regex(local.regexp_lang_ingress, record.rule)[5]
+            stateless   = regex(local.regexp_lang_ingress, record.rule)[5] == "stateless" ? true : false
+            src = regex(local.regexp_lang_ingress, record.rule)[6]
             dst = null
-            stateless   = regex(local.regexp_lang_ingress, record.rule)[6] == "stateless" ? true : false
             description = can(regex(local.regexp_lang_ingress, record.rule)[7]) ? regex(local.regexp_lang_ingress, record.rule)[7] : null
         } if can(regex(local.regexp_lang_ingress, record.rule))
     } 
@@ -151,10 +160,10 @@ locals {
                 regex(local.regexp_lang_egress_dst, record.rule)[1], # dst_min
                 regex(local.regexp_lang_egress_dst, record.rule)[2] != "" ? format("-%s",regex(local.regexp_lang_egress_dst, record.rule)[2]) : ""  # dst_max
             )
+            stateless   = regex(local.regexp_lang_egress_dst, record.rule)[3] == "stateless" ? true : false
             src      = null
             dst = regex(local.regexp_lang_egress_dst, record.rule)[4]
-            stateless   = regex(local.regexp_lang_egress_dst, record.rule)[5] == "stateless" ? true : false
-            description = can(regex(local.regexp_lang_egress_dst, record.rule)[6]) ? regex(local.regexp_lang_ingress, record.rule)[6] : null
+            description = can(regex(local.regexp_lang_egress_dst, record.rule)[5]) ? regex(local.regexp_lang_egress_dst, record.rule)[5] : null
         } if can(regex(local.regexp_lang_egress_dst, record.rule))
     } 
   } 
@@ -180,10 +189,10 @@ locals {
                 regex(local.regexp_lang_ingress_dst, record.rule)[1], # dst_min
                 regex(local.regexp_lang_ingress_dst, record.rule)[2]  # dst_max
             )
-            src = regex(local.regexp_lang_ingress_dst, record.rule)[3]
+            stateless   = regex(local.regexp_lang_ingress_dst, record.rule)[3] == "stateless" ? true : false
+            src = regex(local.regexp_lang_ingress_dst, record.rule)[4]
             dst = null
             description = null
-            stateless   = regex(local.regexp_lang_ingress_dst, record.rule)[4] == "stateless" ? true : false
         } if can(regex(local.regexp_lang_ingress_dst, record.rule))
     } 
   } 
@@ -209,9 +218,9 @@ locals {
                 regex(local.regexp_lang_ingress_dst_cmt, record.rule)[1], # dst_min
                 regex(local.regexp_lang_ingress_dst_cmt, record.rule)[2]  # dst_max
             )
-            src = regex(local.regexp_lang_ingress_dst_cmt, record.rule)[3]
+            stateless   = regex(local.regexp_lang_ingress_dst_cmt, record.rule)[3] == "stateless" ? true : false
+            src = regex(local.regexp_lang_ingress_dst_cmt, record.rule)[4]
             dst = null
-            stateless   = regex(local.regexp_lang_ingress_dst_cmt, record.rule)[4] == "stateless" ? true : false
             description = can(regex(local.regexp_lang_ingress_dst_cmt, record.rule)[5]) ? regex(local.regexp_lang_ingress_dst_cmt, record.rule)[5] : null
         } if can(regex(local.regexp_lang_ingress_dst_cmt, record.rule))
     }
@@ -237,9 +246,11 @@ locals {
                 regex(local.regexp_lang_icmp_ingress_cmt, record.rule)[0], # type
                 regex(local.regexp_lang_icmp_ingress_cmt, record.rule)[1]  # code
             )
-            src = regex(local.regexp_lang_icmp_ingress_cmt, record.rule)[2]
+            stateless   = regex(local.regexp_lang_icmp_ingress_cmt, record.rule)[2] == "stateless" ? true : false
+            
+            src = regex(local.regexp_lang_icmp_ingress_cmt, record.rule)[3]
             dst = null
-            stateless   = regex(local.regexp_lang_icmp_ingress_cmt, record.rule)[3] == "stateless" ? true : false
+            
             description = regex(local.regexp_lang_icmp_ingress_cmt, record.rule)[4]
         } if can(regex(local.regexp_lang_icmp_ingress_cmt, record.rule))
     }
@@ -265,10 +276,12 @@ locals {
                 regex(local.regexp_lang_icmp_ingress, record.rule)[0], # type
                 regex(local.regexp_lang_icmp_ingress, record.rule)[1]  # code
             )
-            src = regex(local.regexp_lang_icmp_ingress, record.rule)[2]
+            stateless   = regex(local.regexp_lang_icmp_ingress, record.rule)[2] == "stateless" ? true : false
+
+            src = regex(local.regexp_lang_icmp_ingress, record.rule)[3]
             dst = null
+
             description = null
-            stateless   = regex(local.regexp_lang_icmp_ingress, record.rule)[3] == "stateless" ? true : false
         } if can(regex(local.regexp_lang_icmp_ingress, record.rule))
     }
   } 
@@ -294,10 +307,11 @@ locals {
                 regex(local.regexp_lang_icmp_egress_cmt, record.rule)[0], # type
                 regex(local.regexp_lang_icmp_egress_cmt, record.rule)[1]  # code
             )
-            src = null
-            dst = regex(local.regexp_lang_icmp_egress_cmt, record.rule)[2]
 
-            stateless   = regex(local.regexp_lang_icmp_egress_cmt, record.rule)[3] == "stateless" ? true : false
+            stateless   = regex(local.regexp_lang_icmp_egress_cmt, record.rule)[2] == "stateless" ? true : false
+            src = null
+            dst = regex(local.regexp_lang_icmp_egress_cmt, record.rule)[3]
+
             description = regex(local.regexp_lang_icmp_egress_cmt, record.rule)[4]
         } if can(regex(local.regexp_lang_icmp_egress_cmt, record.rule))
     }
@@ -323,10 +337,11 @@ locals {
                 regex(local.regexp_lang_icmp_egress, record.rule)[0], # type
                 regex(local.regexp_lang_icmp_egress, record.rule)[1]  # code
             )
+            stateless   = regex(local.regexp_lang_icmp_egress, record.rule)[2] == "stateless" ? true : false
+
             src = null
             dst = regex(local.regexp_lang_icmp_egress, record.rule)[3]
 
-            stateless   = regex(local.regexp_lang_icmp_egress, record.rule)[3] == "stateless" ? true : false
             description = null
         } if can(regex(local.regexp_lang_icmp_egress, record.rule))
     }
