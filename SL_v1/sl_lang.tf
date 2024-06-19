@@ -19,12 +19,20 @@ variable "sl_lang" {
         "accept icmp/1. from 0.0.0.0/0 /* icmp type 1 */",
         "permit icmp/3. stateless to 0.0.0.0/0",
         "accept icmp/8.1 from 0.0.0.0/0"        
+        ],
+      "demo3" = [
+        "accept icmp/8 from 0.0.0.0/0", 
+        "accept icmp/1. from 0.0.0.0/0 /* icmp type 1 */",
+        "accept icmp/8.1 stateless from _test.label_multiple",
+        "permit icmp/8 to 0.0.0.0/0", 
+        "permit icmp/1. to 0.0.0.0/0 /* icmp type 1 */",
+        "permit icmp/8.1 stateless to _test.label_multiple"       
         ]
       }
 }
-// output sl_lang {
-//     value = var.sl_lang
-// }
+# output sl_lang {
+#     value = var.sl_lang
+# }
 
 #  pattern to decode lexical rule
 locals {
@@ -32,21 +40,19 @@ locals {
     regexp_lang_ingress = "^accept\\s+${local.regexp_ip_ports_full}\\s*${local.regexp_stateless}\\s+from\\s+${local.regexp_label}\\s*${local.regexp_comment_option}"
 }
 
-
-
 # patterns for special case of dst only
 locals {
     regexp_lang_egress_dst = "^permit\\s+${local.regexp_ip_ports_dst}\\s*${local.regexp_stateless}\\s+to\\s+${local.regexp_label}\\s*${local.regexp_comment_option}"
-    // regexp_lang_ingress_dst_cmt takes full syntax with comments
-    // regexp_lang_ingress_dst is ended by $
-    // both are workaround for lack of knowledge how to forbid ':' character after ports.
-    // w/o above ingress_dst regexp matches generic regexp_lang_ingress
+    # regexp_lang_ingress_dst_cmt takes full syntax with comments
+    # regexp_lang_ingress_dst is ended by $
+    # both are workaround for lack of knowledge how to forbid ':' character after ports.
+    # w/o above ingress_dst regexp matches generic regexp_lang_ingress
     regexp_lang_ingress_dst_cmt =  "^accept\\s+${local.regexp_ip_ports_dst}\\s*${local.regexp_stateless}\\s+from\\s+${local.regexp_label}\\s+${local.regexp_comment}"
     regexp_lang_ingress_dst = "^accept\\s+${local.regexp_ip_ports_dst}\\s*${local.regexp_stateless}\\s+from\\s+${local.regexp_label}\\s*${local.regexp_eol}"
 }
-output regexp_lang_egress_dst {
-  value = local.regexp_lang_egress_dst
-}
+# output regexp_lang_egress_dst {
+#   value = local.regexp_lang_egress_dst
+# }
 
 # patterns for icmp
 locals {
@@ -75,9 +81,9 @@ locals {
         ] 
   } 
 }
-// output sl_lang_indexed {
-//     value = local.sl_lang_indexed
-// }
+# output sl_lang_indexed {
+#     value = local.sl_lang_indexed
+# }
 
 # process generic egress pattern
 locals {
@@ -89,7 +95,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_egress"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_egress
+            #_regexp     = local.regexp_lang_egress
 
             # try egress generic
             protocol    = format("%s/%s%s:%s%s",
@@ -107,9 +113,9 @@ locals {
     } 
   }  
 }
-// output sl_lang_egress {
-//     value = local.sl_lang_egress
-// }
+# output sl_lang_egress {
+#     value = local.sl_lang_egress
+# }
 
 # process generic ingress pattern
 locals {
@@ -121,7 +127,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_ingress"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_ingress
+            #_regexp     = local.regexp_lang_ingress
 
             # try egress generic
             protocol    = format("%s/%s%s:%s%s",
@@ -139,9 +145,9 @@ locals {
     } 
   } 
 }
-// output sl_lang_ingress {
-//     value = local.sl_lang_ingress
-// }
+# output sl_lang_ingress {
+#     value = local.sl_lang_ingress
+# }
 
 # process simplified egress pattern
 locals {
@@ -153,7 +159,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_egress_dst"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_egress_dst
+            #_regexp     = local.regexp_lang_egress_dst
 
             protocol    = format("%s/%s%s",
                 regex(local.regexp_lang_egress_dst, record.rule)[0], # protocol
@@ -168,9 +174,9 @@ locals {
     } 
   } 
 }
-// output sl_lang_egress_dst {
-//     value = local.sl_lang_egress_dst
-// }
+# output sl_lang_egress_dst {
+#     value = local.sl_lang_egress_dst
+# }
 
 # process simplified ingress pattern w/o comment
 locals {
@@ -182,7 +188,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_ingress_dst"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_ingress_dst
+            #_regexp     = local.regexp_lang_ingress_dst
 
             protocol    = format("%s/%s-%s",
                 regex(local.regexp_lang_ingress_dst, record.rule)[0], # protocol
@@ -197,9 +203,9 @@ locals {
     } 
   } 
 }
-// output sl_lang_ingress_dst {
-//     value = local.sl_lang_ingress_dst
-// }
+# output sl_lang_ingress_dst {
+#     value = local.sl_lang_ingress_dst
+# }
 
 # process simplified ingress pattern
 locals {
@@ -211,7 +217,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_ingress_dst_cmt"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_ingress_dst_cmt
+            #_regexp     = local.regexp_lang_ingress_dst_cmt
 
             protocol    = format("%s/%s-%s",
                 regex(local.regexp_lang_ingress_dst_cmt, record.rule)[0], # protocol
@@ -226,9 +232,9 @@ locals {
     }
   } 
 }
-// output sl_lang_ingress_dst_cmt {
-//     value = local.sl_lang_ingress_dst_cmt
-// }
+# output sl_lang_ingress_dst_cmt {
+#     value = local.sl_lang_ingress_dst_cmt
+# }
 
 # process simplified ingress icmp pattern with comment
 locals {
@@ -240,7 +246,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_icmp_ingress_cmt"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_icmp_ingress_cmt
+            #_regexp     = local.regexp_lang_icmp_ingress_cmt
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_lang_icmp_ingress_cmt, record.rule)[0], # type
@@ -256,9 +262,9 @@ locals {
     }
   } 
 }
-// output sl_lang_icmp_ingress_cmt {
-//     value = local.sl_lang_icmp_ingress_cmt
-// }
+# output sl_lang_icmp_ingress_cmt {
+#     value = local.sl_lang_icmp_ingress_cmt
+# }
 
 # process simplified ingress icmp pattern
 locals {
@@ -270,7 +276,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_icmp_ingress"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_icmp_ingress
+            #_regexp     = local.regexp_lang_icmp_ingress
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_lang_icmp_ingress, record.rule)[0], # type
@@ -286,9 +292,9 @@ locals {
     }
   } 
 }
-// output sl_lang_icmp_ingress {
-//     value = local.sl_lang_icmp_ingress
-// }
+# output sl_lang_icmp_ingress {
+#     value = local.sl_lang_icmp_ingress
+# }
 
 
 # process simplified egress icmp pattern with comment
@@ -301,7 +307,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_icmp_egress_cmt"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_icmp_egress_cmt
+            #_regexp     = local.regexp_lang_icmp_egress_cmt
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_lang_icmp_egress_cmt, record.rule)[0], # type
@@ -317,9 +323,9 @@ locals {
     }
   } 
 }
-// output sl_lang_icmp_egress_cmt {
-//     value = local.sl_lang_icmp_egress_cmt
-// }
+# output sl_lang_icmp_egress_cmt {
+#     value = local.sl_lang_icmp_egress_cmt
+# }
 
 # process simplified egress icmp pattern
 locals {
@@ -331,7 +337,7 @@ locals {
             _position   = record._position
             _format     = "regexp_lang_icmp_egress"
             _src        = record.rule
-            //_regexp     = local.regexp_lang_icmp_egress
+            #_regexp     = local.regexp_lang_icmp_egress
 
             protocol    = format("icmp/%s.%s",
                 regex(local.regexp_lang_icmp_egress, record.rule)[0], # type
@@ -347,21 +353,21 @@ locals {
     }
   } 
 }
-// output sl_lang_icmp_egress {
-//     value = local.sl_lang_icmp_egress
-// }
+# output sl_lang_icmp_egress {
+#     value = local.sl_lang_icmp_egress
+# }
 
 locals {
-  // generate sorted positions for each key
+  # generate sorted positions for each key
   sl_lang_positions_per_key = {
     for key, value in local.sl_lang_indexed : 
       key =>
       sort(formatlist("%010d", [for rule in value : rule._position]))
   }
 }
-// output "sl_lang_positions_per_key" {
-//   value = local.sl_lang_positions_per_key
-// }
+# output "sl_lang_positions_per_key" {
+#    value = local.sl_lang_positions_per_key
+# }
 
 locals {
   sl_lang_map = {
@@ -370,10 +376,10 @@ locals {
       rules = [
         for position in local.sl_lang_positions_per_key[key]:
 
-            // data is kept in separate data structures because of processing limitations
-            // this is a moment when all pieces are collected together
-            // Note that each interim data structure keeps distinct set of data,
-            // what is guaranteed by processing filters.  
+            # data is kept in separate data structures because of processing limitations
+            # this is a moment when all pieces are collected together
+            # Note that each interim data structure keeps distinct set of data,
+            # what is guaranteed by processing filters.  
             can(local.sl_lang_egress[key][tonumber(position)])
                 ? local.sl_lang_egress[key][tonumber(position)] 
                 : can(local.sl_lang_ingress[key][tonumber(position)])

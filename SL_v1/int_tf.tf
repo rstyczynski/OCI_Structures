@@ -51,9 +51,9 @@ locals {
     } 
   }
 }
-output "sl_tf" {
-  value = local.sl_tf
-}
+# output "sl_tf" {
+#   value = local.sl_tf
+# }
 
 
 locals {
@@ -64,9 +64,9 @@ locals {
       }
   }
 }
-// output "sl_tf_ingress" {
-//   value = local.sl_tf_ingress
-// }
+output "sl_tf_ingress" {
+  value = local.sl_tf_ingress
+}
 
 locals {
   sl_tf_egress = {
@@ -76,16 +76,16 @@ locals {
       }
   }
 }
-// output "sl_tf_egress" {
-//   value = local.sl_tf_egress
-// }
+output "sl_tf_egress" {
+  value = local.sl_tf_egress
+}
 
 // get rules for egress
-output "sl_tf_egress_key" {
-  value = local.sl_tf_egress[var.sl_key].rules
-}
+# output "sl_tf_egress_key" {
+#   value = try(local.sl_tf_egress[var.sl_key].rules, null)
+# }
 
 // get rules for ingress
-output "sl_tf_ingress_key" {
-  value = local.sl_tf_ingress[var.sl_key].rules
-}
+# output "sl_tf_ingress_key" {
+#   value = try(local.sl_tf_ingress[var.sl_key].rules, null)
+# }

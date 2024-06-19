@@ -51,9 +51,9 @@ locals {
       }
   }
 }
-// output "sl_cislz_ingress" {
-//   value = local.sl_cislz_ingress
-// }
+output "sl_cislz_ingress" {
+  value = local.sl_cislz_ingress
+}
 
 locals {
   sl_cislz_egress = {
@@ -63,16 +63,16 @@ locals {
       }
   }
 }
-// output "sl_cislz_egress" {
-//   value = local.sl_cislz_egress
-// }
-
-// get rules for egress
-output "sl_cislz_egress_key" {
-  value = local.sl_cislz_egress[var.sl_key].rules
+output "sl_cislz_egress" {
+  value = local.sl_cislz_egress
 }
 
-// get rules for ingress
+# get rules for egress
+output "sl_cislz_egress_key" {
+  value = try(local.sl_cislz_egress[var.sl_key].rules, null)
+}
+
+# get rules for ingress
 output "sl_cislz_ingress_key" {
-  value = local.sl_cislz_ingress[var.sl_key].rules
+  value = try(local.sl_cislz_ingress[var.sl_key].rules, null)
 }
